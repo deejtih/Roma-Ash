@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -252,7 +253,7 @@
 
 <p id="loading" style="font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-faint)">Loading guest list…</p>
 
-<div id="main" style="display:none;width:100%;display:none;flex-direction:column;align-items:center">
+<div id="main" style="display:none;width:100%;flex-direction:column;align-items:center">
 
 <div class="header">
   <h1>Find Your Seat</h1>
@@ -301,7 +302,7 @@ async function loadGuests() {
       tableName: nameTableKey ? String(r[nameTableKey]||'').trim() : ''
     })).filter(g => g.name);
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('main').style.display = 'block';
+    document.getElementById('main').style.display = 'flex';
   } catch(e) {
     document.getElementById('loading').textContent = 'Guest list could not be loaded. Please try again later.';
   }
@@ -364,7 +365,7 @@ nameInput.addEventListener('input', () => {
   sugBox.style.display = 'block';
 });
 
-document.addEventListener('click', e => {
+document.addEventListener('mousedown', e => {
   if (!e.target.closest('.input-wrap')) sugBox.style.display='none';
 });
 
