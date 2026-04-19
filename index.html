@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Seat</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #faf8f5;
+    --warm-white: #ffffff;
+    --border: #e8e2da;
+    --border-soft: #f0ebe4;
+    --text: #2c2420;
+    --text-muted: #8c7e74;
+    --text-faint: #b5aaa3;
+    --accent: #8b6f5e;
+    --success: #4a7c5e;
+  }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+    color: var(--text);
+  }
+
+  .header { text-align: center; margin-bottom: 2.25rem; }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 6vw, 3rem);
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  .couple-name {
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 auto 2.25rem;
+    max-width: 320px;
+  }
+  .divider-line { flex: 1; height: 0.5px; background: var(--border); }
+  .divider-symbol { color: var(--text-faint); font-size: 12px; }
+
+  .card {
+    background: var(--warm-white);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 2.25rem;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .field-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.45rem;
+  }
+
+  .input-wrap { position: relative; margin-bottom: 1.1rem; }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--text);
+    background: #faf8f6;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  #suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--warm-white);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 20;
+    display: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  .sug-item {
+    padding: 0.6rem 0.9rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 0.5px solid var(--border-soft);
+    transition: background 0.12s;
+  }
+  .sug-item:last-child { border-bottom: none; }
+  .sug-item:hover { background: #faf8f5; }
+  .sug-badge {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+  }
+
+  .lookup-btn {
+    width: 100%;
+    padding: 0.78rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 0.5px solid var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .lookup-btn:hover { background: var(--accent); color: #fff; }
+
+  .sep { height: 0.5px; background: var(--border-soft); margin: 1.4rem 0; }
+
+  #result { display: none; }
+
+  .result-found { text-align: center; padding: 0.75rem 0; }
+  .welcome-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+  .guest-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.55rem;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 1.1rem;
+  }
+  .table-box {
+    display: inline-block;
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 2.25rem;
+  }
+  .table-lbl {
+    font-size: 0.64rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.15rem;
+  }
+  .table-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.2rem;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+  }
+  .table-name-display {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .did-you-mean {
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 0.7rem;
+  }
+  .sug-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.85rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text);
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 0.4rem;
+    transition: background 0.15s;
+  }
+  .sug-btn:hover { background: #faf8f5; }
+  .sug-btn-meta {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.64rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+    margin-left: 0.75rem;
+  }
+
+  .not-found {
+    text-align: center;
+    padding: 0.75rem 0;
+  }
+  .not-found p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+
+
+
+  @media (max-width: 480px) {
+    .card { padding: 1.5rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Find Your Seat</h1>
+  <p class="couple-name" id="couple-display">Emma &amp; James &middot; June 14, 2025</p>
+</div>
+
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="divider-symbol">✦</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="card">
+  <div class="input-wrap">
+    <label class="field-label" for="nameInput">Your name</label>
+    <input type="text" id="nameInput" placeholder="e.g. Sarah Johnson" autocomplete="off" />
+    <div id="suggestions"></div>
+  </div>
+  <button class="lookup-btn" onclick="lookup()">Find my table</button>
+  <div id="result"></div>
+</div>
+
+
+
+<script>
+// ── Guest data (pre-loaded defaults) ──────────────────────────────────────────
+let guests = [
+  {name:"Sarah Johnson",table:"1",tableName:"Rose"},
+  {name:"Michael Johnson",table:"1",tableName:"Rose"},
+  {name:"Emily Chen",table:"2",tableName:"Lily"},
+  {name:"David Chen",table:"2",tableName:"Lily"},
+  {name:"Oliver Smith",table:"3",tableName:"Peony"},
+  {name:"Grace Smith",table:"3",tableName:"Peony"},
+  {name:"Thomas Brown",table:"4",tableName:"Dahlia"},
+  {name:"Isabelle Brown",table:"4",tableName:"Dahlia"},
+  {name:"James Miller",table:"5",tableName:"Magnolia"},
+  {name:"Rachel Miller",table:"5",tableName:"Magnolia"},
+  {name:"William Taylor",table:"6",tableName:"Iris"},
+  {name:"Sophia Taylor",table:"6",tableName:"Iris"},
+  {name:"Henry White",table:"7",tableName:"Jasmine"},
+  {name:"Claire White",table:"7",tableName:"Jasmine"},
+  {name:"George Harris",table:"8",tableName:"Wisteria"},
+  {name:"Anna Harris",table:"8",tableName:"Wisteria"},
+];
+
+// ── Fuzzy matching ─────────────────────────────────────────────────────────────
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, (_,i) => Array.from({length: n+1}, (_,j) => j===0 ? i : 0));
+  for (let j=1;j<=n;j++) dp[0][j]=j;
+  for (let i=1;i<=m;i++)
+    for (let j=1;j<=n;j++)
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function fuzzyScore(query, candidate) {
+  query = query.toLowerCase(); candidate = candidate.toLowerCase();
+  if (candidate === query) return 1;
+  if (candidate.includes(query) || query.includes(candidate)) return 0.93;
+  const qw = query.split(' '), cw = candidate.split(' ');
+  let wordScore = 0;
+  for (const q of qw) {
+    let best = 0;
+    for (const c of cw) {
+      if (c===q) best = Math.max(best,1);
+      else if (c.startsWith(q)||q.startsWith(c)) best = Math.max(best,0.85);
+      else best = Math.max(best, 1 - levenshtein(q,c)/Math.max(q.length,c.length));
+    }
+    wordScore += best;
+  }
+  wordScore = wordScore / Math.max(qw.length, cw.length);
+  const fullScore = 1 - levenshtein(query,candidate)/Math.max(query.length,candidate.length);
+  return Math.max(wordScore*0.9, fullScore);
+}
+
+function getSuggestions(query, threshold=0.36, max=5) {
+  if (!query || query.length < 2) return [];
+  return guests
+    .map(g => ({guest:g, score:fuzzyScore(query, g.name)}))
+    .filter(x => x.score >= threshold)
+    .sort((a,b) => b.score - a.score)
+    .slice(0, max);
+}
+
+// ── Live dropdown ─────────────────────────────────────────────────────────────
+const nameInput = document.getElementById('nameInput');
+const sugBox = document.getElementById('suggestions');
+
+nameInput.addEventListener('input', () => {
+  const val = nameInput.value.trim();
+  const matches = getSuggestions(val, 0.38, 5);
+  if (!matches.length || val.length < 2) { sugBox.style.display='none'; return; }
+  sugBox.innerHTML = matches.map(({guest,score}) =>
+    `<div class="sug-item" onclick="selectGuest(${JSON.stringify(guest.name)})">
+       <span>${guest.name}</span>
+       <span class="sug-badge">${score>=0.95?'exact':score>=0.8?'close':'similar'}</span>
+     </div>`).join('');
+  sugBox.style.display = 'block';
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.input-wrap')) sugBox.style.display='none';
+});
+
+function selectGuest(name) {
+  nameInput.value = name;
+  sugBox.style.display = 'none';
+  const g = guests.find(g => g.name.toLowerCase()===name.toLowerCase());
+  if (g) showResult(g);
+}
+
+// ── Lookup logic ──────────────────────────────────────────────────────────────
+function lookup() {
+  sugBox.style.display = 'none';
+  const val = nameInput.value.trim();
+  const res = document.getElementById('result');
+  if (!val) { res.style.display='none'; return; }
+  res.style.display = 'block';
+
+  const exact = guests.find(g => g.name.toLowerCase()===val.toLowerCase());
+  if (exact) { showResult(exact); return; }
+
+  const matches = getSuggestions(val, 0.38, 5);
+  if (matches.length===1 && matches[0].score>=0.82) { showResult(matches[0].guest); return; }
+  if (matches.length > 0) {
+    res.innerHTML = `<div class="sep"></div><div class="did-you-mean">Did you mean…</div>` +
+      matches.map(({guest}) =>
+        `<button class="sug-btn" onclick="selectGuest(${JSON.stringify(guest.name)})">
+           <span>${guest.name}</span>
+           <span class="sug-btn-meta">Table ${guest.table}${guest.tableName ? ' · '+guest.tableName : ''}</span>
+         </button>`).join('');
+    return;
+  }
+  res.innerHTML = `<div class="sep"></div><div class="not-found"><p>We couldn't find your name.<br>Please check the spelling or ask a member of the wedding party.</p></div>`;
+}
+
+function showResult(g) {
+  document.getElementById('result').innerHTML =
+    `<div class="sep"></div>
+     <div class="result-found">
+       <div class="welcome-label">Welcome,</div>
+       <div class="guest-name">${g.name}</div>
+       <div class="table-box">
+         <div class="table-lbl">Your table</div>
+         <div class="table-num">${g.table}</div>
+         ${g.tableName ? `<div class="table-name-display">${g.tableName}</div>` : ''}
+       </div>
+     </div>`;
+}
+
+nameInput.addEventListener('keydown', e => { if(e.key==='Enter') lookup(); });
+
+
+</script>
+</body>
+</html>
