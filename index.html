@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -358,10 +357,17 @@ nameInput.addEventListener('input', () => {
   const matches = getSuggestions(val, 0.38, 5);
   if (!matches.length || val.length < 2) { sugBox.style.display='none'; return; }
   sugBox.innerHTML = matches.map(({guest,score}) =>
-    `<div class="sug-item" onclick="selectGuest(${JSON.stringify(guest.name)})">
+    `<div class="sug-item">
        <span>${guest.name}</span>
        <span class="sug-badge">${score>=0.95?'exact':score>=0.8?'close':'similar'}</span>
      </div>`).join('');
+  // Attach mousedown (not click) with preventDefault so input doesn't blur before selection
+  sugBox.querySelectorAll('.sug-item').forEach((el, i) => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      selectGuest(matches[i].guest.name);
+    });
+  });
   sugBox.style.display = 'block';
 });
 
