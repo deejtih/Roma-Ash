@@ -243,6 +243,24 @@
 
 
 
+  .tablemates {
+    margin-top: 1.25rem;
+    text-align: center;
+  }
+  .tablemates-label {
+    font-size: 0.63rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 0.5rem;
+  }
+  .tablemate {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
   @media (max-width: 480px) {
     .card { padding: 1.5rem 1.25rem; }
   }
@@ -408,6 +426,13 @@ function lookup() {
 }
 
 function showResult(g) {
+  const tablemates = guests.filter(x => x.table === g.table && x.name !== g.name);
+  const tameplatesHTML = tablemates.length
+    ? `<div class="tablemates">
+         <div class="tablemates-label">Also at your table</div>
+         ${tablemates.map(x => `<div class="tablemate">${x.name}</div>`).join('')}
+       </div>`
+    : '';
   document.getElementById('result').innerHTML =
     `<div class="sep"></div>
      <div class="result-found">
@@ -418,6 +443,7 @@ function showResult(g) {
          <div class="table-num">${g.table}</div>
          ${g.tableName ? `<div class="table-name-display">${g.tableName}</div>` : ''}
        </div>
+       ${tameplatesHTML}
      </div>`;
 }
 
