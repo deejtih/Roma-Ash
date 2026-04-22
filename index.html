@@ -12,35 +12,31 @@
 
   :root {
     --ink:        #1e1a17;
-    --ink-mid:    #6b5d54;
-    --ink-soft:   #a89890;
-    --ink-faint:  #cfc5be;
+    --ink-mid:    #4a3f38;   /* darker — was #6b5d54 */
+    --ink-soft:   #7a6b62;   /* darker — was #a89890 */
+    --ink-faint:  #a89890;   /* darker — was #cfc5be */
     --parchment:  #f7f3ee;
     --paper:      #fdfbf8;
     --gold:       #b8975a;
     --gold-pale:  #e8d9bc;
-    --rule:       #ece5dc;
-    --rule-soft:  #f3ede6;
-    --hover-bg:   #f5ede3;
+    --rule:       #ddd5cc;   /* slightly darker for visibility */
+    --rule-soft:  #ece5dc;
+    --hover-bg:   #f0e8dc;
   }
 
   body {
     font-family: 'Tenor Sans', sans-serif;
     background: var(--parchment);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     padding: 3rem 1.5rem;
     color: var(--ink);
-    position: relative;
-    overflow-x: hidden;
+    position: relative; overflow-x: hidden;
   }
 
   body::before {
-    content: '';
-    position: fixed; inset: 0;
+    content: ''; position: fixed; inset: 0;
     background-image: repeating-linear-gradient(
       0deg, transparent, transparent 39px,
       rgba(184,151,90,0.06) 39px, rgba(184,151,90,0.06) 40px
@@ -49,13 +45,13 @@
   }
 
   .corner { position: fixed; width: 56px; height: 56px; pointer-events: none; z-index: 0; }
-  .corner-tl { top: 1.5rem; left: 1.5rem; border-top: 1px solid var(--gold-pale); border-left: 1px solid var(--gold-pale); }
-  .corner-tr { top: 1.5rem; right: 1.5rem; border-top: 1px solid var(--gold-pale); border-right: 1px solid var(--gold-pale); }
-  .corner-bl { bottom: 1.5rem; left: 1.5rem; border-bottom: 1px solid var(--gold-pale); border-left: 1px solid var(--gold-pale); }
-  .corner-br { bottom: 1.5rem; right: 1.5rem; border-bottom: 1px solid var(--gold-pale); border-right: 1px solid var(--gold-pale); }
+  .corner-tl { top:1.5rem; left:1.5rem; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .corner-tr { top:1.5rem; right:1.5rem; border-top:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+  .corner-bl { bottom:1.5rem; left:1.5rem; border-bottom:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .corner-br { bottom:1.5rem; right:1.5rem; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
 
   #loading {
-    font-size: 0.65rem; letter-spacing: 0.24em; text-transform: uppercase;
+    font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase;
     color: var(--ink-faint); position: relative; z-index: 1;
     animation: pulse 1.8s ease-in-out infinite;
   }
@@ -68,10 +64,10 @@
   }
   @keyframes rise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
-  /* Header */
+  /* ── Header ── */
   .header { text-align: center; margin-bottom: 2rem; }
   .pre-title {
-    font-size: 0.6rem; letter-spacing: 0.32em; text-transform: uppercase;
+    font-size: 0.65rem; letter-spacing: 0.32em; text-transform: uppercase;
     color: var(--gold); margin-bottom: 0.8rem; display: block;
   }
   h1 {
@@ -79,66 +75,63 @@
     font-size: clamp(3rem, 9vw, 4.5rem);
     font-weight: 300; font-style: italic;
     color: var(--ink); line-height: 0.9; margin-bottom: 0.7rem;
-    letter-spacing: -0.01em;
   }
   .subtitle {
-    font-size: 0.6rem; letter-spacing: 0.28em;
+    font-size: 0.65rem; letter-spacing: 0.26em;
     text-transform: uppercase; color: var(--ink-soft);
   }
 
-  /* Ornament */
+  /* ── Ornament ── */
   .ornament {
     display: flex; align-items: center; gap: 0.8rem;
     margin: 0 auto 2.5rem; max-width: 240px; width: 100%;
   }
-  .ornament-line {
-    flex: 1; height: 1px;
-    background: linear-gradient(to right, transparent, var(--gold-pale), transparent);
-  }
+  .ornament-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold-pale), transparent); }
   .ornament-gem { color: var(--gold); font-size: 9px; }
 
-  /* Card */
+  /* ── Card ── */
   .card {
     background: var(--paper);
     border: 1px solid var(--rule);
     border-radius: 1px;
     padding: 2.5rem 2.5rem 2rem;
     width: 100%; max-width: 460px;
-    box-shadow: 0 1px 2px rgba(30,26,23,.03), 0 8px 40px rgba(30,26,23,.07),
+    box-shadow: 0 1px 2px rgba(30,26,23,.04), 0 8px 40px rgba(30,26,23,.08),
                 inset 0 1px 0 rgba(255,255,255,.9);
     position: relative;
   }
   .card::before { content:''; position:absolute; top:8px; left:8px; width:10px; height:10px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
   .card::after  { content:''; position:absolute; bottom:8px; right:8px; width:10px; height:10px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
 
+  /* ── Field label ── */
   .field-label {
-    font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase;
-    color: var(--ink-soft); display: block; margin-bottom: 0.5rem;
+    font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-mid); display: block; margin-bottom: 0.5rem;
   }
 
   .input-wrap { position: relative; margin-bottom: 1.25rem; }
 
   input[type="text"] {
-    width: 100%; padding: 0.72rem 1rem;
+    width: 100%; padding: 0.75rem 1rem;
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.2rem; font-weight: 300;
+    font-size: 1.25rem; font-weight: 300;
     color: var(--ink); background: var(--parchment);
     border: 1px solid var(--rule); border-radius: 1px;
     outline: none; transition: border-color .2s, box-shadow .2s;
   }
-  input[type="text"]:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,90,.1); }
+  input[type="text"]:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,90,.12); }
   input[type="text"]::placeholder { color: var(--ink-faint); }
 
-  /* Dropdown */
+  /* ── Dropdown ── */
   #suggestions {
     position: absolute; top: calc(100% + 5px); left: 0; right: 0;
     background: var(--paper); border: 1px solid var(--rule); border-radius: 1px;
     overflow: hidden; z-index: 20; display: none;
-    box-shadow: 0 8px 28px rgba(30,26,23,.1);
+    box-shadow: 0 8px 28px rgba(30,26,23,.12);
   }
   .sug-item {
-    padding: 0.65rem 1rem;
-    font-family: 'Cormorant Garamond', serif; font-size: 1.05rem;
+    padding: 0.7rem 1rem;
+    font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;
     color: var(--ink); cursor: pointer;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--rule-soft); transition: background .12s;
@@ -147,16 +140,16 @@
   .sug-item:hover { background: var(--hover-bg); }
   .sug-badge {
     font-family: 'Tenor Sans', sans-serif;
-    font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--gold); background: rgba(184,151,90,.1);
-    padding: .15rem .45rem; border-radius: 20px;
+    font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); background: rgba(184,151,90,.12);
+    padding: .18rem .5rem; border-radius: 20px; white-space: nowrap;
   }
 
-  /* Button */
+  /* ── Button ── */
   .lookup-btn {
-    width: 100%; padding: 0.82rem;
+    width: 100%; padding: 0.85rem;
     font-family: 'Tenor Sans', sans-serif;
-    font-size: 0.63rem; letter-spacing: 0.26em; text-transform: uppercase;
+    font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase;
     color: var(--ink); background: transparent;
     border: 1px solid var(--gold); border-radius: 1px;
     cursor: pointer; transition: color .25s, background .25s, box-shadow .25s;
@@ -166,9 +159,10 @@
     content:''; position:absolute; inset:0; background:var(--gold);
     transform:scaleX(0); transform-origin:left; transition:transform .3s ease; z-index:-1;
   }
-  .lookup-btn:hover { color: var(--paper); box-shadow: 0 4px 18px rgba(184,151,90,.28); }
+  .lookup-btn:hover { color: var(--paper); box-shadow: 0 4px 18px rgba(184,151,90,.3); }
   .lookup-btn:hover::before { transform:scaleX(1); }
 
+  /* ── Separator ── */
   .sep {
     height: 1px;
     background: linear-gradient(to right, transparent, var(--rule), transparent);
@@ -177,15 +171,16 @@
 
   #result { display: none; }
 
+  /* ── Result ── */
   .result-found { text-align: center; padding: .5rem 0 .25rem; animation: rise .5s ease both; }
 
   .welcome-label {
-    font-size: 0.56rem; letter-spacing: 0.28em; text-transform: uppercase;
+    font-size: 0.65rem; letter-spacing: 0.26em; text-transform: uppercase;
     color: var(--ink-soft); margin-bottom: .4rem;
   }
   .guest-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 2rem; font-style: italic; font-weight: 300;
+    font-size: 2.1rem; font-style: italic; font-weight: 300;
     color: var(--ink); margin-bottom: 1.5rem; line-height: 1.1;
   }
   .table-box {
@@ -196,7 +191,7 @@
   .table-box::before { content:''; position:absolute; top:5px; left:5px; width:8px; height:8px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
   .table-box::after  { content:''; position:absolute; bottom:5px; right:5px; width:8px; height:8px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
   .table-lbl {
-    font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase;
+    font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--ink-soft); margin-bottom: .2rem;
   }
   .table-num {
@@ -204,14 +199,14 @@
     font-size: 4rem; font-weight: 300; color: var(--ink); line-height: 1;
   }
 
-  /* Did you mean */
+  /* ── Did you mean ── */
   .did-you-mean {
-    font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--ink-soft); text-align: center; margin-bottom: .85rem;
+    font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-mid); text-align: center; margin-bottom: .85rem;
   }
   .sug-btn {
     display: flex; align-items: center; justify-content: space-between;
-    width: 100%; text-align: left; padding: .65rem 1rem;
+    width: 100%; text-align: left; padding: .7rem 1rem;
     font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;
     color: var(--ink); background: transparent;
     border: 1px solid var(--rule); border-radius: 1px;
@@ -221,33 +216,34 @@
   .sug-btn:hover { background: var(--hover-bg); border-color: var(--gold-pale); }
   .sug-btn-meta {
     font-family: 'Tenor Sans', sans-serif;
-    font-size: 0.58rem; letter-spacing: .1em;
-    color: var(--ink-faint); white-space: nowrap; margin-left: .75rem;
+    font-size: 0.62rem; letter-spacing: .1em;
+    color: var(--ink-soft); white-space: nowrap; margin-left: .75rem;
   }
 
+  /* ── Not found ── */
   .not-found { text-align: center; padding: .75rem 0; }
   .not-found p {
     font-family: 'Cormorant Garamond', serif; font-style: italic;
-    color: var(--ink-soft); font-size: 1.05rem; line-height: 1.7;
+    color: var(--ink-mid); font-size: 1.05rem; line-height: 1.7;
   }
 
-  /* Tablemates */
+  /* ── Tablemates ── */
   .tablemates { margin-top: 1.5rem; text-align: center; }
   .tablemates-label {
-    font-size: 0.56rem; letter-spacing: .2em; text-transform: uppercase;
-    color: var(--ink-faint); margin-bottom: .6rem;
+    font-size: 0.62rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--ink-soft); margin-bottom: .65rem;
   }
   .tablemate {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem; color: var(--ink-soft); line-height: 1.8;
+    font-size: 1.05rem; color: var(--ink-mid); line-height: 1.8;
   }
 
-  /* Map link */
+  /* ── Map link ── */
   .map-link {
     display: inline-flex; align-items: center; gap: .4rem;
     margin-top: 2.5rem;
-    font-size: 0.58rem; letter-spacing: .22em; text-transform: uppercase;
-    color: var(--ink-soft); text-decoration: none;
+    font-size: 0.65rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--ink-mid); text-decoration: none;
     border-bottom: 1px solid var(--rule); padding-bottom: .2rem;
     transition: color .2s, border-color .2s;
   }
@@ -403,7 +399,6 @@ function lookup() {
            <span class="sug-btn-meta">Table ${guest.table}</span>
          </button>`
       ).join('');
-    // mousedown prevents blur/click race — this is the fix
     res.querySelectorAll('.sug-btn').forEach((btn,i) => {
       btn.addEventListener('mousedown', e=>{ e.preventDefault(); selectGuest(matches[i].guest.name); });
     });

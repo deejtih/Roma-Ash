@@ -10,66 +10,127 @@
 <style>
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
   :root {
-    --ink:#1e1a17; --ink-soft:#a89890; --ink-faint:#cfc5be;
+    --ink:#1e1a17; --ink-mid:#4a3f38; --ink-soft:#7a6b62; --ink-faint:#a89890;
     --parchment:#f7f3ee; --paper:#fdfbf8;
-    --gold:#b8975a; --gold-pale:#e8d9bc;
-    --rule:#ece5dc; --hover-bg:#f5ede3; --active-bg:#f0e4d4;
+    --gold:#b8975a; --gold-pale:#e0cc9e; --gold-light:#f5ede3;
+    --rule:#ddd5cc; --hover-bg:#f0e6d8; --active-bg:#e8d5bc;
   }
-  body { font-family:'Tenor Sans',sans-serif; background:var(--parchment); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:3rem 1.5rem 5rem; color:var(--ink); position:relative; overflow-x:hidden; }
-  body::before { content:''; position:fixed; inset:0; background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(184,151,90,.06) 39px,rgba(184,151,90,.06) 40px); pointer-events:none; z-index:0; }
+  body {
+    font-family:'Tenor Sans',sans-serif; background:var(--parchment);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:3rem 1.5rem 5rem; color:var(--ink); position:relative; overflow-x:hidden;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(184,151,90,.05) 39px,rgba(184,151,90,.05) 40px);
+    pointer-events:none; z-index:0;
+  }
   .corner { position:fixed; width:56px; height:56px; pointer-events:none; z-index:0; }
   .corner-tl { top:1.5rem; left:1.5rem; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
   .corner-tr { top:1.5rem; right:1.5rem; border-top:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
   .corner-bl { bottom:1.5rem; left:1.5rem; border-bottom:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
   .corner-br { bottom:1.5rem; right:1.5rem; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
-  #loading-msg { font-size:.65rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-faint); position:relative; z-index:1; animation:pulse 1.8s ease-in-out infinite; margin-top:6rem; }
+
+  #loading-msg { font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-faint); position:relative; z-index:1; animation:pulse 1.8s ease-in-out infinite; margin-top:6rem; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
   #app { display:none; width:100%; flex-direction:column; align-items:center; position:relative; z-index:1; animation:rise .7s cubic-bezier(.22,.68,0,1.2) both; }
   @keyframes rise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
-  .nav-back { align-self:flex-start; font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none; border-bottom:1px solid var(--rule); padding-bottom:.2rem; margin-bottom:2.5rem; transition:color .2s,border-color .2s; }
+
+  .nav-back { align-self:flex-start; font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-mid); text-decoration:none; border-bottom:1px solid var(--rule); padding-bottom:.2rem; margin-bottom:2.5rem; transition:color .2s,border-color .2s; }
   .nav-back:hover { color:var(--gold); border-color:var(--gold-pale); }
+
   .header { text-align:center; margin-bottom:2rem; }
-  .pre-title { font-size:.6rem; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); margin-bottom:.8rem; display:block; }
+  .pre-title { font-size:.65rem; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); margin-bottom:.8rem; display:block; }
   h1 { font-family:'Cormorant Garamond',serif; font-size:clamp(2.8rem,8vw,4.2rem); font-weight:300; font-style:italic; color:var(--ink); line-height:.92; margin-bottom:.7rem; }
-  .subtitle { font-size:.6rem; letter-spacing:.28em; text-transform:uppercase; color:var(--ink-soft); }
+  .subtitle { font-size:.65rem; letter-spacing:.26em; text-transform:uppercase; color:var(--ink-soft); }
+
   .ornament { display:flex; align-items:center; gap:.8rem; margin:0 auto 2.5rem; max-width:240px; width:100%; }
   .ornament-line { flex:1; height:1px; background:linear-gradient(to right,transparent,var(--gold-pale),transparent); }
   .ornament-gem { color:var(--gold); font-size:9px; }
-  .layout { display:flex; gap:2.5rem; align-items:flex-start; width:100%; max-width:1100px; flex-wrap:wrap; justify-content:center; }
-  .map-container { background:var(--paper); border:1px solid var(--rule); border-radius:1px; padding:1.5rem; box-shadow:0 1px 2px rgba(30,26,23,.03),0 8px 40px rgba(30,26,23,.06),inset 0 1px 0 rgba(255,255,255,.9); position:relative; flex-shrink:0; overflow:auto; }
-  .map-container::before { content:''; position:absolute; top:8px; left:8px; width:10px; height:10px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
-  .map-container::after  { content:''; position:absolute; bottom:8px; right:8px; width:10px; height:10px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+
+  .layout { display:flex; gap:2.5rem; align-items:flex-start; width:100%; max-width:1260px; flex-wrap:wrap; justify-content:center; }
+
+  /* ── Map card ── */
+  .map-container {
+    background:var(--paper); border:1px solid var(--rule); border-radius:2px;
+    padding:1.75rem;
+    box-shadow:0 2px 4px rgba(30,26,23,.05),0 12px 48px rgba(30,26,23,.09),inset 0 1px 0 rgba(255,255,255,.9);
+    position:relative; flex-shrink:0; overflow:auto;
+  }
+  .map-container::before { content:''; position:absolute; top:10px; left:10px; width:14px; height:14px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .map-container::after  { content:''; position:absolute; bottom:10px; right:10px; width:14px; height:14px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+
+  /* ── Table circles ── */
   .tbl { cursor:pointer; }
-  .tbl circle.bg { fill:var(--paper); stroke:var(--rule); stroke-width:1.5; transition:fill .18s,stroke .18s,stroke-width .18s; }
-  .tbl text.num { font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic; fill:var(--ink-soft); text-anchor:middle; dominant-baseline:central; pointer-events:none; transition:fill .18s; user-select:none; }
-  .tbl text.sub { font-family:'Tenor Sans',sans-serif; font-size:6px; letter-spacing:.08em; text-transform:uppercase; fill:var(--gold); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  .tbl:hover circle.bg { fill:var(--hover-bg); stroke:var(--gold-pale); stroke-width:2; }
-  .tbl:hover text.num { fill:var(--gold); }
-  .tbl.active circle.bg { fill:var(--active-bg); stroke:var(--gold); stroke-width:2.5; }
-  .tbl.active text.num { fill:var(--gold); }
-  .tbl.sweetheart circle.bg { fill:#fdf5ec; stroke:var(--gold-pale); stroke-width:1.5; }
-  .tbl.sweetheart.active circle.bg, .tbl.sweetheart:hover circle.bg { stroke:var(--gold); fill:var(--active-bg); }
-  .rlbl { font-family:'Tenor Sans',sans-serif; font-size:8px; letter-spacing:.1em; text-transform:uppercase; fill:var(--ink-faint); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  .rlbl-lg { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; fill:var(--ink-faint); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  .panel { flex:1; min-width:220px; max-width:280px; }
-  .panel-placeholder { border:1px dashed var(--rule); border-radius:1px; padding:2.25rem 1.5rem; text-align:center; }
-  .panel-placeholder p { font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--ink-faint); font-size:1rem; line-height:1.75; }
-  .panel-card { background:var(--paper); border:1px solid var(--rule); border-radius:1px; padding:1.75rem 1.5rem; display:none; animation:rise .3s ease both; position:relative; box-shadow:0 4px 24px rgba(30,26,23,.06); }
-  .panel-card::before { content:''; position:absolute; top:8px; left:8px; width:8px; height:8px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
-  .panel-card::after  { content:''; position:absolute; bottom:8px; right:8px; width:8px; height:8px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
-  .pc-num { font-family:'Cormorant Garamond',serif; font-size:3.5rem; font-weight:300; color:var(--gold); line-height:1; margin-bottom:.1rem; }
-  .pc-lbl { font-size:.56rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:1.25rem; }
-  .pc-sep { height:1px; background:linear-gradient(to right,transparent,var(--rule),transparent); margin-bottom:1.1rem; }
-  .pc-guests-lbl { font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:.55rem; }
-  .pc-guest { font-family:'Cormorant Garamond',serif; font-size:1rem; color:var(--ink-soft); line-height:1.8; }
-  .pc-count { font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-top:.85rem; }
-  @media (max-width:660px) { .panel { max-width:100%; width:100%; } .layout { gap:1.5rem; } }
+  .tbl circle.bg {
+    fill:var(--paper); stroke:#a89880; stroke-width:1.8;
+    transition:fill .18s,stroke .2s,stroke-width .18s;
+    filter:drop-shadow(0 1px 4px rgba(30,26,23,.12));
+  }
+  .tbl text.num {
+    font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:400; font-style:italic;
+    fill:#2a2218; text-anchor:middle; dominant-baseline:central;
+    pointer-events:none; transition:fill .18s; user-select:none;
+  }
+  .tbl text.sub {
+    font-family:'Tenor Sans',sans-serif; font-size:7.5px; letter-spacing:.1em;
+    text-transform:uppercase; fill:var(--gold); text-anchor:middle;
+    pointer-events:none; user-select:none;
+  }
+  .tbl:hover circle.bg { fill:var(--hover-bg); stroke:var(--gold); stroke-width:2.2; }
+  .tbl:hover text.num  { fill:#8b6f3a; }
+  .tbl.active circle.bg { fill:var(--active-bg); stroke:var(--gold); stroke-width:2.8; filter:drop-shadow(0 2px 8px rgba(184,151,90,.4)); }
+  .tbl.active text.num  { fill:#6b4c1e; }
+
+  /* Sweetheart */
+  .tbl.sweetheart circle.bg { fill:#fdf0e0; stroke:var(--gold); stroke-width:2; }
+  .tbl.sweetheart text.num  { fill:#8b6f3a; }
+  .tbl.sweetheart:hover circle.bg, .tbl.sweetheart.active circle.bg { fill:var(--active-bg); stroke-width:2.8; }
+
+  /* ── Room labels ── */
+  .rlbl {
+    font-family:'Tenor Sans',sans-serif; font-size:10px; letter-spacing:.13em;
+    text-transform:uppercase; fill:#6b5d54;
+    text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none;
+  }
+  .rlbl-lg {
+    font-family:'Cormorant Garamond',serif; font-size:17px; font-style:italic;
+    fill:#6b5d54; text-anchor:middle; dominant-baseline:central;
+    pointer-events:none; user-select:none;
+  }
+  .rlbl-sm {
+    font-family:'Tenor Sans',sans-serif; font-size:8.5px; letter-spacing:.11em;
+    text-transform:uppercase; fill:#8a7a72;
+    text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none;
+  }
+
+  /* ── Panel ── */
+  .panel { flex:1; min-width:240px; max-width:300px; }
+  .panel-placeholder { border:1px dashed var(--rule); border-radius:2px; padding:2.5rem 1.75rem; text-align:center; }
+  .panel-placeholder p { font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--ink-faint); font-size:1.05rem; line-height:1.8; }
+  .panel-card {
+    background:var(--paper); border:1px solid var(--rule); border-radius:2px;
+    padding:2rem 1.75rem; display:none; animation:rise .3s ease both;
+    position:relative; box-shadow:0 4px 28px rgba(30,26,23,.08);
+  }
+  .panel-card::before { content:''; position:absolute; top:10px; left:10px; width:10px; height:10px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .panel-card::after  { content:''; position:absolute; bottom:10px; right:10px; width:10px; height:10px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+  .pc-num { font-family:'Cormorant Garamond',serif; font-size:4rem; font-weight:300; color:var(--gold); line-height:1; margin-bottom:.1rem; }
+  .pc-lbl { font-size:.64rem; letter-spacing:.26em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:1.35rem; }
+  .pc-sep { height:1px; background:linear-gradient(to right,transparent,var(--rule),transparent); margin-bottom:1.15rem; }
+  .pc-guests-lbl { font-size:.62rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:.65rem; }
+  .pc-guest { font-family:'Cormorant Garamond',serif; font-size:1.05rem; color:var(--ink-mid); line-height:1.85; }
+  .pc-count { font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-top:.9rem; }
+
+  @media (max-width:700px) { .panel { max-width:100%; width:100%; } .layout { gap:1.5rem; } }
 </style>
 </head>
 <body>
   <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
   <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+
   <p id="loading-msg">Loading guest list…</p>
+
   <div id="app">
     <a href="index.html" class="nav-back">← Back to find my seat</a>
     <div class="header">
@@ -80,95 +141,15 @@
     <div class="ornament">
       <div class="ornament-line"></div><span class="ornament-gem">✦</span><div class="ornament-line"></div>
     </div>
+
     <div class="layout">
       <div class="map-container">
-        <!--
-          SVG coordinate system — based on the hand-drawn floor plan:
-          viewBox: 700 × 580
-          Room walls: x=20,y=20 → x=680,y=560
-
-          KEY FEATURES from the plan:
-          - Dance floor: large square, centre-left of room
-          - DJ table: top-left corner (outside or nook)
-          - Two bars: along the top wall
-          - Backdrop + arch: left wall, below DJ
-          - Photo bal & stairs: lower-left block
-          - Gift table: near stairs
-          - Bridal entrance: bottom-centre-left
-          - Guest entrance: bottom-centre-right
-          - QR code / welcome sign: bottom-right area
-          - Photo booth: right side near bottom
-          - Dashed line: divides room roughly down the middle vertically
-
-          TABLE POSITIONS — from your confirmed order (left→right, top→bottom):
-          The plan shows:
-            Top row (above dance floor level): 17, 13 | then right half: 7, 10
-            Then four rows of tables filling the room:
-              Left of dashed line (beside/below dance floor):
-                Col A: 17(top), 13
-                Below dance floor: 24, 12, 23, 25, 28
-              Right of dashed line:
-                Row 1: 3, 9,  | 7(top-right area), 10
-                Row 2: 5, 15, | right cols
-                Row 3: 1(sweetheart), 11
-                Row 4: 6, 21
-                etc.
-
-          After careful analysis of BOTH the image AND your confirmed ordering:
-
-          The room is wide. The dance floor occupies the upper-left quadrant.
-          Tables are arranged:
-          - Two tables to the LEFT of the dance floor top (17, 13) in the top strip
-          - Then columns to the RIGHT of the dance floor
-
-          Your order "left top to bottom" = reading each COLUMN top-to-bottom, left column first:
-
-          Col 1 (leftmost table column, beside/left of dance floor): 17, 13
-            — only 2 tables here, aligned with the top of the room beside the left bar
-
-          Then right of dance floor, 5 columns × 4–5 rows:
-          Col 2: 7, 3, 5, 1(sweetheart), 6, 2  — WAIT, that's 6 which is too many
-
-          Actually re-reading your sequence as ROWS (reading left to right across each row):
-          Row 1: 17, 13, 7, 19
-          Row 2:  3,  9, 5, 15
-          Row 3:  1(♥),11, 6, 21
-          Row 4:  2,  8,22, 12
-          Row 5:  4, 20,10, 18
-          Row 6: 24, 23,16, 27
-          Row 7: 28, 14,25     (only 3)
-
-          BUT from the floor plan image the dance floor takes up the LEFT side rows 2-5,
-          so the left-side tables (17,13) are ABOVE the dance floor, and then 3,5,6,2 etc
-          are to the RIGHT of the dance floor, not above it.
-
-          FINAL INTERPRETATION matching both the image and your number order:
-          - The dance floor is in the LEFT-CENTRE of the room
-          - Tables 17 and 13 sit ABOVE the dance floor (same top strip as 7 and the right-side tables)
-          - Tables below/beside the dance floor on the left: 24, 12 (to the left), 23, 25, 28 (bottom)
-          - All other tables fill the RIGHT half of the room in a 4-column grid
-
-          GRID LAYOUT:
-          ┌─────────────────────────────────────────────────────┐
-          │ DJ  │ 17   13  │ bar │   7   19  │ bar │           │
-          │─────┼──────────┤     ├───────────┤─────┤           │
-          │     │ dance    │     │  3    9   │     │           │
-          │ bk  │ floor    │     │  5   15   │     │           │
-          │ dp  │          │     │  1♥  11   │     │           │
-          │     │          │     │  6   21   │     │           │
-          │─────┼──────────┤─────┼───────────┤─────┤           │
-          │  24  12        │  2    8   22   12│     │           │
-          │  23  25        │  4   20   10   18│     │           │
-          │  28            │ 24   23   16   27│     │           │
-          └─────────────────────────────────────────────────────┘
-
-          Hmm, this is getting complicated. Let me just place tables precisely
-          based on the IMAGE positions, using your confirmed numbers.
-        -->
-        <svg id="map" viewBox="0 0 700 580" width="700" height="580" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
       <div class="panel">
-        <div class="panel-placeholder" id="panel-empty"><p>Select any table to see who's seated there</p></div>
+        <div class="panel-placeholder" id="panel-empty">
+          <p>Select any table to see who's seated there</p>
+        </div>
         <div class="panel-card" id="panel-card">
           <div class="pc-num" id="pc-num"></div>
           <div class="pc-lbl" id="pc-lbl">Table</div>
@@ -189,9 +170,9 @@ async function loadGuests() {
     const res = await fetch('guests.xlsx?v=' + Date.now());
     if (!res.ok) throw new Error();
     const buf = await res.arrayBuffer();
-    const wb = XLSX.read(buf, { type: 'array' });
+    const wb = XLSX.read(buf, { type:'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
     guests = rows.map(r => ({
       name:  String(r['Full Name']    || '').trim(),
       table: String(r['Table Number'] || '').trim(),
@@ -210,211 +191,205 @@ async function loadGuests() {
 }
 loadGuests();
 
+// ── SVG helpers ───────────────────────────────────────────────────────────────
 const NS = 'http://www.w3.org/2000/svg';
-function mk(tag, attrs) {
+function mk(tag, attrs={}) {
   const e = document.createElementNS(NS, tag);
-  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
+  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
   return e;
 }
-function app(p, ...children) { children.forEach(c => p.appendChild(c)); return p; }
-function rct(x,y,w,h,a={})  { return mk('rect',{x,y,width:w,height:h,...a}); }
-function lin(x1,y1,x2,y2,a={}){ return mk('line',{x1,y1,x2,y2,...a}); }
-function txt(x,y,s,cls,dy=0) {
-  const t = mk('text',{x,y:y+dy,class:cls});
-  t.textContent=s; return t;
-}
+function add(parent, ...children) { children.forEach(c => parent.appendChild(c)); return parent; }
+function rct(x,y,w,h,a={})     { return mk('rect', {x,y,width:w,height:h,...a}); }
+function lin(x1,y1,x2,y2,a={}) { return mk('line', {x1,y1,x2,y2,...a}); }
+function lbl(x,y,str,cls)       { const t=mk('text',{x,y,class:cls}); t.textContent=str; return t; }
+
+// ── Canvas dimensions ─────────────────────────────────────────────────────────
+// W × H chosen so all room features + tables fit with breathing room
+// Table radius R=27, spacing S=76 (centre-to-centre)
+const W = 940, H = 720;
+const R = 27, S = 76;
 
 function buildMap() {
   const svg = document.getElementById('map');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width',  W);
+  svg.setAttribute('height', H);
 
-  // ── Scaling note ──────────────────────────────────────────────────────────
-  // The floor plan image is roughly 760px wide × 980px tall (portrait).
-  // Our SVG viewBox is 700 × 580 (landscape to fit screen).
-  // The actual room in the image runs from about x=120→920, y=110→900 (image px).
-  // We scale and translate to fit our viewBox.
+  // ── Room wall ─────────────────────────────────────────────────────────────
+  add(svg, rct(16, 16, W-32, H-32, {
+    fill:'none', stroke:'#bfb5aa', 'stroke-width':'1.5', rx:'3'
+  }));
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ROOM FEATURES
+  // Layout (all coordinates inside the 16..W-16 / 16..H-16 room boundary):
   //
-  // Key landmark positions in IMAGE pixels (approx):
-  //   Room left wall:   x≈120   → SVG x=20
-  //   Room right wall:  x≈920   → SVG x=680
-  //   Room top wall:    y≈110   → SVG y=20
-  //   Room bottom wall: y≈900   → SVG y=540
-  //   Scale x: (680-20)/(920-120) = 660/800 = 0.825
-  //   Scale y: (540-20)/(900-110) = 520/790 = 0.658
+  //  TOP STRIP (y=16..74):
+  //    DJ Table: x=16, w=60, h=58  → right edge x=76
+  //    Left Bar: x=290, w=140, h=52
+  //    Right Bar: x=620, w=140, h=52
   //
-  // Using these scales to map image positions to SVG:
-  //   SVG_x = 20 + (img_x - 120) * 0.825
-  //   SVG_y = 20 + (img_y - 110) * 0.658
-
-  // ── Room outline ──────────────────────────────────────────────────────────
-  // Main rectangular room
-  app(svg, rct(20,20,660,520,{fill:'none',stroke:'#cdc5b8','stroke-width':'1.5',rx:'2'}));
-
-  // ── Dance floor ───────────────────────────────────────────────────────────
-  // In image: roughly x=200→490, y=265→580 → SVG x≈86→305, y≈102→309
-  // It's a square labelled 21'×21'. Positioning it centre-left.
-  app(svg, rct(82,98,210,210,{fill:'#f0e9de',stroke:'var(--gold-pale)','stroke-width':'1',rx:'1'}));
-  app(svg, txt(187,193,'Dance Floor','rlbl-lg'));
-  app(svg, txt(187,210,"21' × 21'",'rlbl'));
-
-  // ── DJ Table ─ top-left corner nook ──────────────────────────────────────
-  app(svg, rct(20,20,46,36,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1'}));
-  app(svg, txt(43,38,'DJ TABLE','rlbl'));
-
-  // ── Bar LEFT ─ top wall, left-of-centre ──────────────────────────────────
-  // In image: x≈330→470, y≈155→220 → SVG x≈173→289, y≈30→72
-  app(svg, rct(170,20,120,40,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(230,40,'BAR','rlbl'));
-
-  // ── Bar RIGHT ─ top wall, right side ─────────────────────────────────────
-  // In image: x≈640→760, y≈155→215 → SVG x≈429→529, y≈30→69
-  app(svg, rct(490,20,120,40,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(550,40,'BAR','rlbl'));
-
-  // ── Backdrop + arch ─ left wall ───────────────────────────────────────────
-  app(svg, rct(20,230,14,100,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1'}));
-  app(svg, txt(27,280,'BACKDROP\n+ ARCH','rlbl'));
-
-  // ── Photo bal & stairs ─ lower-left block ────────────────────────────────
-  // In image: x≈145→295, y≈730→870 → SVG x≈21→144, y≈409→499
-  app(svg, rct(20,405,115,115,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(77,450,'PHOTO BAL','rlbl'));
-  app(svg, txt(77,462,'& STAIRS','rlbl'));
-
-  // ── Gift table ────────────────────────────────────────────────────────────
-  app(svg, rct(20,378,80,22,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(60,389,'GIFT TABLE','rlbl'));
-
-  // ── Bridal entrance ─ bottom ──────────────────────────────────────────────
-  app(svg, rct(148,522,145,18,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(220,531,'BRIDAL ENTRANCE','rlbl'));
-
-  // ── Guest entrance ─ bottom ───────────────────────────────────────────────
-  app(svg, rct(320,522,155,18,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(397,531,'GUEST ENTRANCE','rlbl'));
-
-  // ── QR code / welcome sign ─ bottom-right ────────────────────────────────
-  app(svg, rct(590,522,88,18,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(634,531,'QR / SIGN','rlbl'));
-
-  // ── Photo booth ─ right side ──────────────────────────────────────────────
-  app(svg, rct(620,430,58,80,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
-  app(svg, txt(649,470,'PHOTO\nBOOTH','rlbl'));
-  app(svg, txt(649,462,'PHOTO','rlbl'));
-  app(svg, txt(649,474,'BOOTH','rlbl'));
-
-  // ── Dashed divider ─ roughly vertical centre ──────────────────────────────
-  app(svg, lin(340,62,340,520,{stroke:'#ddd5c8','stroke-width':'1','stroke-dasharray':'5,4'}));
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // TABLE POSITIONS
+  //  LEFT SIDE:
+  //    Dance floor: x=16, y=74, w=258, h=258  → bottom y=332
+  //    Backdrop+arch: thin strip x=16, y=348..458
+  //    Gift table: x=16, y=472, w=100, h=26
+  //    Photo bal & stairs: x=16, y=506, w=148, h=182  → bottom y=688
   //
-  // From the floor plan image + your confirmed ordering (left→right, top→bottom):
+  //  BOTTOM STRIP (y=660..688):
+  //    Bridal entrance: x=182, w=170, h=26
+  //    Guest entrance:  x=380, w=170, h=26
+  //    QR/sign:         x=720, w=120, h=26
   //
-  // The room has tables in these approximate positions:
+  //  BOTTOM-RIGHT:
+  //    Photo booth: x=880, y=560, w=44, h=128
   //
-  // TOP STRIP (y≈75, above the dance floor square):
-  //   17 (x≈160) — left, just right of DJ nook / left of left bar
-  //   13 (x≈250) — right of 17, left of dance floor
-  //   7  (x≈390) — right of dashed line, below right area of left bar
-  //   19 (x≈490) — far right top, near right bar (the arrow in the image points here, labelled "10" in original but your order says "19")
-  //
-  // MIDDLE SECTION — right side of room (x > dance floor):
-  //   The dance floor occupies x≈82→292, y≈98→308
-  //   Tables to the right start at x≈330
-  //
-  //   Inner-right column (x≈340): 3, 5, 1♥, 6, 2  (5 rows, beside dance floor)
-  //   Next column (x≈420):        9,15,11,21, 8,22 (4 rows)
-  //   Outer columns handled below
-  //
-  //   From your 28-table order read as rows:
-  //   Row 1 (y=75):  17, 13,  7, 19
-  //   Row 2 (y=148):  3,  9                    ← right of dance floor
-  //   Row 3 (y=198):  5, 15
-  //   Row 4 (y=248):  1♥,11
-  //   Row 5 (y=298):  6, 21
-  //   Row 6 (y=348):  2,  8, 22, 12
-  //   Row 7 (y=398):  4, 20, 10, 18
-  //   Row 8 (y=448): 24, 23, 16, 27
-  //   Bottom-left:   28(near stairs)
-  //   Bottom extras: 14, 25
-  //
-  // But that's only 3 tables (14,25,28) unaccounted for rows 7-8 on left.
-  // The plan shows 24, 12 at middle-left (below the dance floor area),
-  // and 23, 25, 28 at the bottom-left.
-  //
-  // FINAL confirmed positions:
-  // ────────────────────────────────────────────────────────────────────────────
+  //  TABLES:
+  //    Top row (y=44):      17(190) 13(266) | 7(482) 19(558)
+  //    Rows 2-6 (x=340..628, y=152..532):
+  //      Col A x=340: 3,5,1♥,6,2
+  //      Col B x=416: 9,15,11,21,8
+  //      Col C x=492: 22,12,4,20,10
+  //      Col D x=568: 18,24,23,16,27
+  //    Bottom-left cluster:
+  //      25(190,448)  28(190,532)  14(266,532)
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // R = table radius
-  const R = 21;
+  // DJ Table
+  add(svg,
+    rct(16,16,60,58,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1'}),
+    lbl(46,45,'DJ TABLE','rlbl-sm')
+  );
 
-  // Helper: place table at (x,y) with optional sweetheart flag
+  // Left Bar
+  add(svg,
+    rct(290,16,140,52,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(360,42,'BAR','rlbl')
+  );
+
+  // Right Bar
+  add(svg,
+    rct(620,16,140,52,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(690,42,'BAR','rlbl')
+  );
+
+  // Dance floor
+  add(svg,
+    rct(16,74,258,258,{fill:'#ede5d8',stroke:'#c8b99a','stroke-width':'1.2',rx:'2'}),
+    lbl(145,196,'Dance Floor','rlbl-lg'),
+    lbl(145,216,"21' × 21'",'rlbl-sm')
+  );
+
+  // Backdrop + arch (thin left-wall strip)
+  add(svg,
+    rct(16,348,14,110,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1'}),
+    lbl(23,403,'BACKDROP','rlbl-sm'),
+    lbl(23,415,'+ ARCH','rlbl-sm')
+  );
+
+  // Gift table
+  add(svg,
+    rct(16,472,110,26,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
+    lbl(71,485,'GIFT TABLE','rlbl-sm')
+  );
+
+  // Photo bal & stairs
+  add(svg,
+    rct(16,506,148,182,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(90,587,'PHOTO BAL','rlbl'),
+    lbl(90,602,'& STAIRS','rlbl')
+  );
+
+  // Bridal entrance
+  add(svg,
+    rct(182,662,170,26,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
+    lbl(267,675,'BRIDAL ENTRANCE','rlbl-sm')
+  );
+
+  // Guest entrance
+  add(svg,
+    rct(380,662,170,26,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
+    lbl(465,675,'GUEST ENTRANCE','rlbl-sm')
+  );
+
+  // QR / welcome sign
+  add(svg,
+    rct(720,662,120,26,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
+    lbl(780,675,'QR / SIGN','rlbl-sm')
+  );
+
+  // Photo booth (right wall)
+  add(svg,
+    rct(880,556,44,132,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(902,612,'PHOTO','rlbl-sm'),
+    lbl(902,625,'BOOTH','rlbl-sm')
+  );
+
+  // Dashed centre divider
+  add(svg,
+    lin(454,68,454,656,{stroke:'#ccc3ba','stroke-width':'1','stroke-dasharray':'6,5'})
+  );
+
+  // ── Table positions ───────────────────────────────────────────────────────
+  // Top row sits above the dance floor level, straddling left & right halves
+  // Col X values: A=340, B=416, C=492, D=568 (spacing = S=76)
+  // Row Y values: 1=152, 2=228, 3=304, 4=380, 5=456 (spacing = S=76, starting below top row)
+
   const tables = [
-    // ── Top row (y=73) ────────────────────────────────────────────────
-    // 17 and 13 sit above the dance floor / left side
-    // 7 and 19 sit to the right
-    { n:17, x:160, y:73 },
-    { n:13, x:252, y:73 },
-    { n:7,  x:390, y:73 },
-    { n:19, x:480, y:73 },
+    // Top row (y=44) — above dance floor
+    { n:17, x:190, y:44 },
+    { n:13, x:266, y:44 },
+    { n:7,  x:482, y:44 },
+    { n:19, x:558, y:44 },
 
-    // ── Right of dance floor — inner column (x=342) ────────────────────
-    // These 5 tables run alongside the right edge of the dance floor
-    { n:3,  x:342, y:140 },
-    { n:5,  x:342, y:205 },
-    { n:1,  x:342, y:270, sweetheart:true },
-    { n:6,  x:342, y:335 },
-    { n:2,  x:342, y:400 },
+    // Col A (x=340), rows 1–5
+    { n:3,  x:340, y:152 },
+    { n:5,  x:340, y:228 },
+    { n:1,  x:340, y:304, sweetheart:true },
+    { n:6,  x:340, y:380 },
+    { n:2,  x:340, y:456 },
 
-    // ── Right of dance floor — second column (x=420) ────────────────────
-    { n:9,  x:420, y:140 },
-    { n:15, x:420, y:205 },
-    { n:11, x:420, y:270 },
-    { n:21, x:420, y:335 },
-    { n:8,  x:420, y:400 },
+    // Col B (x=416), rows 1–5
+    { n:9,  x:416, y:152 },
+    { n:15, x:416, y:228 },
+    { n:11, x:416, y:304 },
+    { n:21, x:416, y:380 },
+    { n:8,  x:416, y:456 },
 
-    // ── Third column (x=495) ─────────────────────────────────────────────
-    { n:22, x:495, y:140 },
-    { n:12, x:495, y:205 },
-    { n:4,  x:495, y:270 },
-    { n:20, x:495, y:335 },
-    { n:10, x:495, y:400 },
+    // Col C (x=492), rows 1–5
+    { n:22, x:492, y:152 },
+    { n:12, x:492, y:228 },
+    { n:4,  x:492, y:304 },
+    { n:20, x:492, y:380 },
+    { n:10, x:492, y:456 },
 
-    // ── Fourth column (x=570) ────────────────────────────────────────────
-    { n:18, x:570, y:140 },
-    { n:24, x:570, y:205 },
-    { n:23, x:570, y:270 },
-    { n:16, x:570, y:335 },
-    { n:27, x:570, y:400 },
+    // Col D (x=568), rows 1–5
+    { n:18, x:568, y:152 },
+    { n:24, x:568, y:228 },
+    { n:23, x:568, y:304 },
+    { n:16, x:568, y:380 },
+    { n:27, x:568, y:456 },
 
-    // ── Bottom-left cluster (below dance floor / near stairs) ─────────────
-    // From image: 24 and 12 are mid-left, 23 and 25 are lower-left, 28 near stairs
-    // But 24 is already in col 4 above — re-checking your order:
-    // 17,13,7,19 | 3,9,5,15 | 1,11,6,21 | 2,8,22,12 | 4,20,10,18 | 24,23,16,27 | 28,14,25
-    // So the bottom-left cluster from the image (the isolated tables below dance floor) must be
-    // 28, 14, 25 — placed at bottom-left near the stairs area
-
-    { n:28, x:155, y:450 },
-    { n:14, x:245, y:450 },
-    { n:25, x:155, y:380 },
+    // Bottom-left cluster (below dance floor, near stairs)
+    { n:25, x:190, y:456 },
+    { n:28, x:190, y:532 },
+    { n:14, x:266, y:532 },
   ];
 
-  tables.forEach(t => makeTable(svg, t.n, t.x, t.y, R, t.sweetheart||false));
+  tables.forEach(t => drawTable(svg, t.n, t.x, t.y, t.sweetheart||false));
 }
 
-function makeTable(svg, num, x, y, r, isSweetheart) {
+function drawTable(svg, num, x, y, isSweetheart) {
   const g = mk('g', { class:'tbl'+(isSweetheart?' sweetheart':''), 'data-table':num });
-
-  app(g, mk('circle', { class:'bg', cx:x, cy:y, r }));
+  add(g, mk('circle', { class:'bg', cx:x, cy:y, r:R }));
 
   if (isSweetheart) {
-    app(g, Object.assign(mk('text',{class:'num',x,y:y-6}), {textContent:num}));
-    app(g, Object.assign(mk('text',{class:'sub',x,y:y+7}), {textContent:'♥ sweetheart'}));
+    const n = mk('text', { class:'num', x, y: y-8 }); n.textContent = num; add(g, n);
+    const s = mk('text', { class:'sub', x, y: y+10 }); s.textContent = '♥ sweetheart'; add(g, s);
   } else {
-    app(g, Object.assign(mk('text',{class:'num',x,y}), {textContent:num}));
+    const n = mk('text', { class:'num', x, y }); n.textContent = num; add(g, n);
   }
 
-  svg.appendChild(g);
+  add(svg, g);
   g.addEventListener('click', () => selectTable(num, g, isSweetheart));
 }
 
@@ -438,10 +413,10 @@ function selectTable(num, el, isSweetheart) {
   document.getElementById('pc-num').textContent  = num;
   document.getElementById('pc-lbl').textContent  = isSweetheart ? 'Sweetheart Table' : 'Table';
   document.getElementById('pc-guests').innerHTML = names.length
-    ? names.map(n=>`<div class="pc-guest">${n}</div>`).join('')
+    ? names.map(n => `<div class="pc-guest">${n}</div>`).join('')
     : `<div class="pc-guest" style="color:var(--ink-faint);font-style:italic">No guests assigned</div>`;
   document.getElementById('pc-count').textContent = names.length
-    ? names.length+(names.length===1?' guest':' guests') : '';
+    ? names.length + (names.length === 1 ? ' guest' : ' guests') : '';
 }
 </script>
 </body>
