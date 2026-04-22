@@ -47,21 +47,21 @@
 
   /* Tables */
   .tbl { cursor:pointer; }
-  .tbl circle.bg { fill:var(--paper); stroke:#a89880; stroke-width:1.8; transition:fill .18s,stroke .2s,stroke-width .18s; filter:drop-shadow(0 1px 4px rgba(30,26,23,.11)); }
-  .tbl text.num { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:400; font-style:italic; fill:#2a2218; text-anchor:middle; dominant-baseline:central; pointer-events:none; transition:fill .18s; user-select:none; }
-  .tbl text.sub { font-family:'Tenor Sans',sans-serif; font-size:7px; letter-spacing:.1em; text-transform:uppercase; fill:var(--gold); text-anchor:middle; pointer-events:none; user-select:none; }
+  .tbl circle.bg { fill:var(--paper); stroke:#a89880; stroke-width:1.8; transition:fill .18s,stroke .2s,stroke-width .18s; filter:drop-shadow(0 1px 3px rgba(30,26,23,.1)); }
+  .tbl text.num { font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:400; font-style:italic; fill:#2a2218; text-anchor:middle; dominant-baseline:central; pointer-events:none; transition:fill .18s; user-select:none; }
+  .tbl text.sub { font-family:'Tenor Sans',sans-serif; font-size:6.5px; letter-spacing:.1em; text-transform:uppercase; fill:var(--gold); text-anchor:middle; pointer-events:none; user-select:none; }
   .tbl:hover circle.bg { fill:var(--hover-bg); stroke:var(--gold); stroke-width:2.2; }
-  .tbl:hover text.num  { fill:#8b6f3a; }
+  .tbl:hover text.num { fill:#8b6f3a; }
   .tbl.active circle.bg { fill:var(--active-bg); stroke:var(--gold); stroke-width:2.8; filter:drop-shadow(0 2px 8px rgba(184,151,90,.4)); }
-  .tbl.active text.num  { fill:#5c3d10; }
+  .tbl.active text.num { fill:#5c3d10; }
   .tbl.sweetheart circle.bg { fill:#fdf0e0; stroke:var(--gold); stroke-width:2; }
-  .tbl.sweetheart text.num  { fill:#8b6f3a; }
+  .tbl.sweetheart text.num { fill:#8b6f3a; }
   .tbl.sweetheart.active circle.bg, .tbl.sweetheart:hover circle.bg { fill:var(--active-bg); stroke-width:2.8; }
 
   /* Room labels */
-  .rlbl    { font-family:'Tenor Sans',sans-serif; font-size:10px; letter-spacing:.13em; text-transform:uppercase; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  .rlbl-lg { font-family:'Cormorant Garamond',serif; font-size:17px; font-style:italic; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  .rlbl-sm { font-family:'Tenor Sans',sans-serif; font-size:8.5px; letter-spacing:.11em; text-transform:uppercase; fill:#8a7a72; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
+  .rlbl    { font-family:'Tenor Sans',sans-serif; font-size:9px; letter-spacing:.12em; text-transform:uppercase; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
+  .rlbl-lg { font-family:'Cormorant Garamond',serif; font-size:15px; font-style:italic; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
+  .rlbl-sm { font-family:'Tenor Sans',sans-serif; font-size:8px; letter-spacing:.1em; text-transform:uppercase; fill:#8a7a72; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
 
   /* Sticky panel */
   .panel { flex:0 0 300px; width:300px; position:sticky; top:2rem; align-self:flex-start; }
@@ -145,233 +145,167 @@ const NS = 'http://www.w3.org/2000/svg';
 function mk(tag, a={}) { const e=document.createElementNS(NS,tag); Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v)); return e; }
 function add(p,...kids) { kids.forEach(k=>p.appendChild(k)); return p; }
 function rct(x,y,w,h,a={}) { return mk('rect',{x,y,width:w,height:h,...a}); }
-function lin(x1,y1,x2,y2,a={}) { return mk('line',{x1,y1,x2,y2,...a}); }
-function lbl(x,y,s,c) { const t=mk('text',{x,y,class:c}); t.textContent=s; return t; }
+function lbl(x,y,s,c,dy=0) { const t=mk('text',{x,y:y+dy,class:c}); t.textContent=s; return t; }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// LAYOUT ANALYSIS (from comparing both images carefully):
-//
-// The floor plan is a wide room. Key insight:
-//   • Tables 17 and 13 are NOT above the dance floor —
-//     they sit in ROW 1 at the SAME height as 7 and 19 (and 3/9/22/18).
-//   • The dance floor is a large square that sits BELOW row 1,
-//     occupying the LEFT side of the room (rows 2–5 vertically).
-//   • The table grid is to the RIGHT of the dance floor for rows 2–5,
-//     and spans the full width for row 1 (top) and rows 6–7 (bottom).
-//
-// EXACT LAYOUT (rows top→bottom, cols left→right):
-//
-//  Row 1  (y=R1): 17 · 13 · [gap=dance floor top] · 7 · 19
-//                  ↑ left side                        ↑ right side
-//
-//  Rows 2–5: Dance floor occupies left cols; table grid fills right side
-//    Row 2  (y=R2):  [dance floor] · 3  ·  9  · 22 · 18
-//    Row 3  (y=R3):  [dance floor] · 5  · 15  · 12 · 24
-//    Row 4  (y=R4):  [dance floor] · 1♥ · 11  ·  4 · 23
-//    Row 5  (y=R5):  [dance floor] · 6  · 21  · 20 · 16
-//
-//  Row 6  (y=R6): 25 · [gap] · 2  ·  8  · 10 · 27
-//                  ↑ left of dance floor col
-//
-//  Row 7  (y=R7): 28 · 14 · [gap] · (nothing — bottom cluster)
-//
-// The dashed vertical line sits between col B and col C (between 3/5/1♥/6/2 and 9/15/11/21/8 roughly).
-//
-// COLUMN X POSITIONS:
-//   Col 0 (17,13,25,28): x=C0  — left side, beside/below dance floor
-//   Col 0b (14):         x=C0b — slightly right of 28
-//   Col A (3,5,1♥,6,2):  x=CA  — right edge of dance floor
-//   Col B (9,15,11,21,8): x=CB
-//   Col C (22,12,4,20,10):x=CC
-//   Col D (18,24,23,16,27):x=CD
-//   7 and 19 in top row align with cols B/C or C/D
-//
-// VERIFIED from image 1 screenshot:
-//   17(col≈1), 13(col≈2), 7(col≈4), 19(col≈5)  — top row, 4 tables
-//   3(col≈3),  9(col≈4), 22(col≈5), 18(col≈6)  — row 2
-//   5,         15,        12,         24          — row 3
-//   1♥,        11,         4,         23          — row 4
-//   25, 6,     21,        20,         16          — row 5 (25 is LEFT, then 6 continues)
-//   28, 14, 2,  8,        10,         27          — bottom rows
-//
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Coordinate system ─────────────────────────────────────────────────────────
+// Source canvas: 660×820 (room 20,20 → 640,780)
+// Scale factor: 1.27 uniformly — gives a viewBox of ~838×1041
+// All coordinates below are source × 1.27, rounded to integers.
+// (Computed above via Python.)
 
-// ViewBox: wide room
-// R=26 table radius, S=84 spacing
-const VW=920, VH=760, R=26, S=84;
-
-// Key x positions
-const C17=200, C13=284;                    // left-side top tables
-const CA=368, CB=452, CC=536, CD=620;      // 4 main right-side columns
-const C7=536,  C19=620;                    // top row right tables (align with CC/CD)
-
-// Key y positions
-const R1=96;                               // top row
-const R2=180, R3=264, R4=348, R5=432;     // rows beside dance floor
-const R6=516, R7=600;                      // bottom rows
-
-// Dance floor: left wall x=16, top y just below top strip
-// DF spans from x=16 to just left of CA, y from below bars to above row 6
-const DF_X=16, DF_Y=136, DF_W=316, DF_H=340;
+const VW = 870, VH = 1070;  // slight extra margin
 
 function buildMap() {
   const svg = document.getElementById('map');
   svg.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
-  svg.setAttribute('width', VW);
+  svg.setAttribute('width',  VW);
   svg.setAttribute('height', VH);
 
-  // Room wall
-  add(svg, rct(16,16,VW-32,VH-32,{fill:'none',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
+  // ── Room ──────────────────────────────────────────────────────────────────
+  // source: x=20,y=20,w=620,h=760 → scaled ×1.27
+  add(svg, rct(25,25,787,965,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'4'}));
 
-  // DJ Table — top-left corner
+  // ── Dance floor ───────────────────────────────────────────────────────────
+  // source: x=175,y=120,w=190,h=160 → 222,152,241,203
   add(svg,
-    rct(16,16,60,54,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1'}),
-    lbl(46,43,'DJ TABLE','rlbl-sm')
+    rct(222,152,241,203,{fill:'#ede5d8',stroke:'#c8b99a','stroke-width':'1.2',rx:'3'}),
+    lbl(342,245,'Dance Floor','rlbl-lg'),
+    lbl(342,264,"21' × 21'",'rlbl-sm')
   );
 
-  // Bar LEFT — top, left of centre
+  // ── DJ table ──────────────────────────────────────────────────────────────
+  // source: x=22,y=22,w=100,h=65 → 28,28,127,83
   add(svg,
-    rct(308,16,140,54,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(378,43,'BAR','rlbl')
+    rct(28,28,127,83,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
+    lbl(91,70,'DJ TABLE','rlbl-sm')
   );
 
-  // Bar RIGHT — top, right side
+  // ── Bar 1 ─────────────────────────────────────────────────────────────────
+  // source: x=470,y=22,w=80,h=50 → 597,28,102,64
   add(svg,
-    rct(634,16,150,54,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(709,43,'BAR','rlbl')
+    rct(597,28,102,64,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
+    lbl(648,60,'BAR','rlbl')
   );
 
-  // Dance floor
+  // ── Bar 2 ─────────────────────────────────────────────────────────────────
+  // source: x=568,y=22,w=80,h=50 → 721,28,102,64
   add(svg,
-    rct(DF_X, DF_Y, DF_W, DF_H, {fill:'#ede5d8',stroke:'#c8b99a','stroke-width':'1.2',rx:'2'}),
-    lbl(DF_X+DF_W/2, DF_Y+DF_H/2-12, 'Dance Floor', 'rlbl-lg'),
-    lbl(DF_X+DF_W/2, DF_Y+DF_H/2+12, "21' × 21'", 'rlbl-sm')
+    rct(721,28,102,64,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
+    lbl(772,60,'BAR','rlbl')
   );
 
-  // Backdrop + arch — left wall, beside dance floor
+  // ── Backdrop + arches ─────────────────────────────────────────────────────
+  // source: x=22,y=110,w=16,h=210 → 28,140,20,267
   add(svg,
-    rct(16, DF_Y+DF_H+10, 14, 90, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1'}),
-    lbl(23, DF_Y+DF_H+55, 'BKDROP', 'rlbl-sm'),
-    lbl(23, DF_Y+DF_H+68, '+ARCH',  'rlbl-sm')
+    rct(28,140,20,267,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(38,225,'BACKDROP','rlbl-sm'),
+    lbl(38,238,'+ ARCHES','rlbl-sm')
   );
 
-  // Gift table
+  // ── Gift table ────────────────────────────────────────────────────────────
+  // source: x=22,y=330,w=65,h=32 → 28,419,83,41
   add(svg,
-    rct(16, DF_Y+DF_H+114, 110, 26, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
-    lbl(71, DF_Y+DF_H+127, 'GIFT TABLE', 'rlbl-sm')
+    rct(28,419,83,41,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(69,440,'GIFT TABLE','rlbl-sm')
   );
 
-  // Photo bal & stairs — bottom-left
+  // ── Floral stands ─────────────────────────────────────────────────────────
+  // source: x=22,y=540,w=55,h=28 → 28,686,70,36
   add(svg,
-    rct(16, DF_Y+DF_H+150, 150, 180, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(91, DF_Y+DF_H+235, 'PHOTO BAL', 'rlbl'),
-    lbl(91, DF_Y+DF_H+250, '& STAIRS',  'rlbl')
+    rct(28,686,70,36,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(63,704,'FLORAL','rlbl-sm')
   );
 
-  // Bridal entrance
+  // ── Photo bal & stairs ───────────────────────────────────────────────────
+  // source: x=22,y=680,w=120,h=60 → 28,864,152,76
   add(svg,
-    rct(182, VH-46, 162, 26, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
-    lbl(263, VH-33, 'BRIDAL ENTRANCE', 'rlbl-sm')
+    rct(28,864,152,76,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
+    lbl(104,896,'PHOTO BAL','rlbl'),
+    lbl(104,910,'& STAIRS','rlbl')
   );
 
-  // Guest entrance
+  // ── Photo booth ───────────────────────────────────────────────────────────
+  // source: x=530,y=695,w=100,h=55 → 673,882,127,70
   add(svg,
-    rct(370, VH-46, 162, 26, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
-    lbl(451, VH-33, 'GUEST ENTRANCE', 'rlbl-sm')
+    rct(673,882,127,70,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
+    lbl(736,912,'PHOTO','rlbl'),
+    lbl(736,925,'BOOTH','rlbl')
   );
 
-  // QR / welcome sign
+  // ── Sweetheart table (ellipse) ────────────────────────────────────────────
+  // source: x=230,y=298,w=120,h=30 → cx=369,cy=402,rx=76,ry=19
+  const sw = mk('ellipse',{cx:369,cy:402,rx:76,ry:19,fill:'#fdf0e0',stroke:'#c8975a','stroke-width':'1.5'});
+  const swt = mk('text',{x:369,y:402,class:'rlbl-sm',style:'fill:#8b6f3a'});
+  swt.textContent = '♥ Sweetheart';
+  add(svg, sw, swt);
+
+  // ── Entrance 1 ────────────────────────────────────────────────────────────
+  // source: x=200,y=760,w=150,h=28 → 254,965,191,36
   add(svg,
-    rct(656, VH-46, 120, 26, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
-    lbl(716, VH-33, 'QR / SIGN', 'rlbl-sm')
+    rct(254,965,191,36,{fill:'#f0ebe3',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'2'}),
+    lbl(349,983,'RECEPTION ENTRANCE','rlbl-sm')
   );
 
-  // Photo booth — right wall
+  // ── Entrance 2 ────────────────────────────────────────────────────────────
+  // source: x=380,y=760,w=130,h=28 → 483,965,165,36
   add(svg,
-    rct(VW-48, R5+40, 32, 130, {fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(VW-32, R5+105, 'PHOTO', 'rlbl-sm'),
-    lbl(VW-32, R5+118, 'BOOTH', 'rlbl-sm')
+    rct(483,965,165,36,{fill:'#f0ebe3',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'2'}),
+    lbl(565,983,'GUEST ENTRANCE','rlbl-sm')
   );
 
-  // Dashed vertical divider (between left and right sections)
+  // ── Welcome / QR ─────────────────────────────────────────────────────────
+  // source: x=520,y=750,w=110,h=30 → 660,953,140,38
   add(svg,
-    lin(410, 70, 410, VH-50, {stroke:'#ccc3ba','stroke-width':'1','stroke-dasharray':'6,5'})
+    rct(660,952,140,38,{fill:'#f0ebe3',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'2'}),
+    lbl(730,971,'QR / SIGN','rlbl-sm')
   );
 
-  // ── TABLES ──────────────────────────────────────────────────────────────
-  //
-  // Reading from the floor plan image precisely:
-  //
-  // ROW 1 (top, y=R1=96):
-  //   17 at x=200  13 at x=284  |  7 at x=536  19 at x=620
-  //
-  // ROWS 2–5 (right side only, dance floor fills left):
-  //   Col A x=368:  3, 5, 1♥, 6
-  //   Col B x=452:  9, 15, 11, 21
-  //   Col C x=536:  22, 12, 4, 20
-  //   Col D x=620:  18, 24, 23, 16
-  //
-  // ROW 6 (y=R6=516) — full width:
-  //   25 at x=200  |  2 at x=368  8 at x=452  10 at x=536  27 at x=620
-  //
-  // ROW 7 (y=R7=600) — bottom cluster:
-  //   28 at x=116  14 at x=200  |  (nothing on right side)
-  //
-  // Note: table 2 is in col A row 6 (matching image1 screenshot showing 2 bottom-left of right grid)
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── Tables ────────────────────────────────────────────────────────────────
+  // All coordinates are source (x,y) × 1.27, rounded.
+  // source r=24 → scaled r=30
+  const R = 30;
 
   const tables = [
-    // Row 1
-    { n:17, x:C17, y:R1 },
-    { n:13, x:C13, y:R1 },
-    { n:7,  x:C7,  y:R1 },
-    { n:19, x:C19, y:R1 },
-
-    // Col A rows 2–5
-    { n:3,  x:CA, y:R2 },
-    { n:5,  x:CA, y:R3 },
-    { n:1,  x:CA, y:R4, sweetheart:true },
-    { n:6,  x:CA, y:R5 },
-
-    // Col B rows 2–5
-    { n:9,  x:CB, y:R2 },
-    { n:15, x:CB, y:R3 },
-    { n:11, x:CB, y:R4 },
-    { n:21, x:CB, y:R5 },
-
-    // Col C rows 2–5
-    { n:22, x:CC, y:R2 },
-    { n:12, x:CC, y:R3 },
-    { n:4,  x:CC, y:R4 },
-    { n:20, x:CC, y:R5 },
-
-    // Col D rows 2–5
-    { n:18, x:CD, y:R2 },
-    { n:24, x:CD, y:R3 },
-    { n:23, x:CD, y:R4 },
-    { n:16, x:CD, y:R5 },
-
-    // Row 6 — full width
-    { n:25, x:C17, y:R6 },
-    { n:2,  x:CA,  y:R6 },
-    { n:8,  x:CB,  y:R6 },
-    { n:10, x:CC,  y:R6 },
-    { n:27, x:CD,  y:R6 },
-
-    // Row 7 — bottom-left cluster
-    { n:28, x:116, y:R7 },
-    { n:14, x:C17, y:R7 },
+    // Positions directly from drag tool × 1.27
+    { n:'1',  x:375, y:489,  sw:true  },  // sweetheart — matches ellipse centre
+    { n:'2',  x:279, y:635           },
+    { n:'3',  x:495, y:394           },
+    { n:'4',  x:273, y:476           },
+    { n:'5',  x:572, y:324           },
+    { n:'6',  x:190, y:318           },
+    { n:'7',  x:622, y:273           },
+    { n:'8',  x:273, y:578           },
+    { n:'9',  x:432, y:667           },
+    { n:'10', x:349, y:610           },
+    { n:'11', x:572, y:432           },
+    { n:'12', x:425, y:565           },
+    { n:'13', x:190, y:413           },
+    { n:'14', x:527, y:565           },
+    { n:'15', x:190, y:508           },
+    { n:'16', x:622, y:197           },
+    { n:'17', x:114, y:470           },
+    { n:'18', x:692, y:394           },
+    { n:'19', x:730, y:197           },
+    { n:'20', x:724, y:508           },
+    { n:'21', x:114, y:578           },
+    { n:'22', x:635, y:749           },
+    { n:'23', x:387, y:749           },
+    { n:'24', x:229, y:749           },
+    { n:'25', x:527, y:749           },
+    { n:'26', x:495, y:648           },
+    { n:'27', x:724, y:622           },
+    { n:'28', x:190, y:826           },
   ];
 
-  tables.forEach(t => drawTable(svg, t.n, t.x, t.y, !!t.sweetheart));
+  tables.forEach(t => drawTable(svg, t.n, t.x, t.y, R, !!t.sw));
 }
 
-function drawTable(svg, num, x, y, isSweetheart) {
+function drawTable(svg, num, x, y, r, isSweetheart) {
   const g = mk('g', { class:'tbl'+(isSweetheart?' sweetheart':''), 'data-table':num });
-  add(g, mk('circle',{class:'bg',cx:x,cy:y,r:R}));
+  add(g, mk('circle',{class:'bg',cx:x,cy:y,r}));
   if (isSweetheart) {
-    const n=mk('text',{class:'num',x,y:y-8}); n.textContent=num; add(g,n);
-    const s=mk('text',{class:'sub',x,y:y+10}); s.textContent='♥ sweetheart'; add(g,s);
+    const n=mk('text',{class:'num',x,y:y-7}); n.textContent=num; add(g,n);
+    const s=mk('text',{class:'sub',x,y:y+9}); s.textContent='♥ sweetheart'; add(g,s);
   } else {
     const n=mk('text',{class:'num',x,y}); n.textContent=num; add(g,n);
   }
