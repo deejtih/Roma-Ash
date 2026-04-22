@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -187,13 +187,6 @@
     color: var(--text);
     line-height: 1;
   }
-  .table-name-display {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
-    font-style: italic;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
-  }
 
   .did-you-mean {
     font-size: 0.66rem;
@@ -240,8 +233,6 @@
     font-size: 1.05rem;
     line-height: 1.65;
   }
-
-
 
   .tablemates {
     margin-top: 1.25rem;
@@ -293,8 +284,6 @@
   <div id="result"></div>
 </div>
 
-
-
 </div><!-- /main -->
 
 <script>
@@ -303,20 +292,18 @@ let guests = [];
 
 async function loadGuests() {
   try {
-    const res = await fetch('guests.xlsx');
+    const res = await fetch('guests.xlsx?v=' + Date.now());
     if (!res.ok) throw new Error('Not found');
     const buf = await res.arrayBuffer();
     const wb = XLSX.read(buf, {type:'array'});
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-    const keys = Object.keys(rows[0] || {});
-    const nameKey = keys.find(k => /name/i.test(k)) || keys[0];
-    const tableKey = keys.find(k => /table.*(num|#|no|number)/i.test(k)) || keys.find(k => /num|#|no|number/i.test(k)) || keys[1];
-    const nameTableKey = keys.find(k => /table.*(name|label)/i.test(k)) || keys[2];
+    // Columns: "First Name", "Full Name", "Table Number"
     guests = rows.map(r => ({
-      name: String(r[nameKey]||'').trim(),
-      table: String(r[tableKey]||'').trim(),
-      tableName: nameTableKey ? String(r[nameTableKey]||'').trim() : ''
+      name: String(r['Full Name'] || '').trim(),
+      firstName: String(r['First Name'] || '').trim(),
+      table: String(r['Table Number'] || '').trim(),
+      tableName: ''
     })).filter(g => g.name);
     document.getElementById('loading').style.display = 'none';
     document.getElementById('main').style.display = 'flex';
@@ -359,8 +346,15 @@ function fuzzyScore(query, candidate) {
 
 function getSuggestions(query, threshold=0.36, max=5) {
   if (!query || query.length < 2) return [];
+  // Also score against firstName for partial searches
   return guests
-    .map(g => ({guest:g, score:fuzzyScore(query, g.name)}))
+    .map(g => ({
+      guest: g,
+      score: Math.max(
+        fuzzyScore(query, g.name),
+        fuzzyScore(query, g.firstName)
+      )
+    }))
     .filter(x => x.score >= threshold)
     .sort((a,b) => b.score - a.score)
     .slice(0, max);
@@ -379,7 +373,6 @@ nameInput.addEventListener('input', () => {
        <span>${guest.name}</span>
        <span class="sug-badge">${score>=0.95?'exact':score>=0.8?'close':'similar'}</span>
      </div>`).join('');
-  // Attach mousedown (not click) with preventDefault so input doesn't blur before selection
   sugBox.querySelectorAll('.sug-item').forEach((el, i) => {
     el.addEventListener('mousedown', e => {
       e.preventDefault();
@@ -418,7 +411,7 @@ function lookup() {
       matches.map(({guest}) =>
         `<button class="sug-btn" onclick="selectGuest(${JSON.stringify(guest.name)})">
            <span>${guest.name}</span>
-           <span class="sug-btn-meta">Table ${guest.table}${guest.tableName ? ' · '+guest.tableName : ''}</span>
+           <span class="sug-btn-meta">Table ${guest.table}</span>
          </button>`).join('');
     return;
   }
@@ -427,7 +420,7 @@ function lookup() {
 
 function showResult(g) {
   const tablemates = guests.filter(x => x.table === g.table && x.name !== g.name);
-  const tameplatesHTML = tablemates.length
+  const tablematesHTML = tablemates.length
     ? `<div class="tablemates">
          <div class="tablemates-label">Also at your table</div>
          ${tablemates.map(x => `<div class="tablemate">${x.name}</div>`).join('')}
@@ -441,15 +434,12 @@ function showResult(g) {
        <div class="table-box">
          <div class="table-lbl">Your table</div>
          <div class="table-num">${g.table}</div>
-         ${g.tableName ? `<div class="table-name-display">${g.tableName}</div>` : ''}
        </div>
-       ${tameplatesHTML}
+       ${tablematesHTML}
      </div>`;
 }
 
 nameInput.addEventListener('keydown', e => { if(e.key==='Enter') lookup(); });
-
-
 </script>
 </body>
 </html>
