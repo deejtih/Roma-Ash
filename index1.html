@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Find Your Seat</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap');
 
@@ -242,6 +243,24 @@
 
 
 
+  .tablemates {
+    margin-top: 1.25rem;
+    text-align: center;
+  }
+  .tablemates-label {
+    font-size: 0.63rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 0.5rem;
+  }
+  .tablemate {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
   @media (max-width: 480px) {
     .card { padding: 1.5rem 1.25rem; }
   }
@@ -249,9 +268,13 @@
 </head>
 <body>
 
+<p id="loading" style="font-family:'Jost',sans-serif;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-faint)">Loading guest list…</p>
+
+<div id="main" style="display:none;width:100%;flex-direction:column;align-items:center">
+
 <div class="header">
   <h1>Find Your Seat</h1>
-  <p class="couple-name" id="couple-display">Emma &amp; James &middot; June 14, 2025</p>
+  <p class="couple-name" id="couple-display">Roma &amp; Ashith &middot; April 25, 2026</p>
 </div>
 
 <div class="divider">
@@ -272,26 +295,36 @@
 
 
 
+</div><!-- /main -->
+
 <script>
-// ── Guest data (pre-loaded defaults) ──────────────────────────────────────────
-let guests = [
-  {name:"Sarah Johnson",table:"1",tableName:"Rose"},
-  {name:"Michael Johnson",table:"1",tableName:"Rose"},
-  {name:"Emily Chen",table:"2",tableName:"Lily"},
-  {name:"David Chen",table:"2",tableName:"Lily"},
-  {name:"Oliver Smith",table:"3",tableName:"Peony"},
-  {name:"Grace Smith",table:"3",tableName:"Peony"},
-  {name:"Thomas Brown",table:"4",tableName:"Dahlia"},
-  {name:"Isabelle Brown",table:"4",tableName:"Dahlia"},
-  {name:"James Miller",table:"5",tableName:"Magnolia"},
-  {name:"Rachel Miller",table:"5",tableName:"Magnolia"},
-  {name:"William Taylor",table:"6",tableName:"Iris"},
-  {name:"Sophia Taylor",table:"6",tableName:"Iris"},
-  {name:"Henry White",table:"7",tableName:"Jasmine"},
-  {name:"Claire White",table:"7",tableName:"Jasmine"},
-  {name:"George Harris",table:"8",tableName:"Wisteria"},
-  {name:"Anna Harris",table:"8",tableName:"Wisteria"},
-];
+// ── Guest data (loaded from guests.xlsx) ──────────────────────────────────────
+let guests = [];
+
+async function loadGuests() {
+  try {
+    const res = await fetch('guests.xlsx');
+    if (!res.ok) throw new Error('Not found');
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    const keys = Object.keys(rows[0] || {});
+    const nameKey = keys.find(k => /name/i.test(k)) || keys[0];
+    const tableKey = keys.find(k => /table.*(num|#|no|number)/i.test(k)) || keys.find(k => /num|#|no|number/i.test(k)) || keys[1];
+    const nameTableKey = keys.find(k => /table.*(name|label)/i.test(k)) || keys[2];
+    guests = rows.map(r => ({
+      name: String(r[nameKey]||'').trim(),
+      table: String(r[tableKey]||'').trim(),
+      tableName: nameTableKey ? String(r[nameTableKey]||'').trim() : ''
+    })).filter(g => g.name);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').style.display = 'flex';
+  } catch(e) {
+    document.getElementById('loading').textContent = 'Guest list could not be loaded. Please try again later.';
+  }
+}
+loadGuests();
 
 // ── Fuzzy matching ─────────────────────────────────────────────────────────────
 function levenshtein(a, b) {
@@ -342,14 +375,21 @@ nameInput.addEventListener('input', () => {
   const matches = getSuggestions(val, 0.38, 5);
   if (!matches.length || val.length < 2) { sugBox.style.display='none'; return; }
   sugBox.innerHTML = matches.map(({guest,score}) =>
-    `<div class="sug-item" onclick="selectGuest(${JSON.stringify(guest.name)})">
+    `<div class="sug-item">
        <span>${guest.name}</span>
        <span class="sug-badge">${score>=0.95?'exact':score>=0.8?'close':'similar'}</span>
      </div>`).join('');
+  // Attach mousedown (not click) with preventDefault so input doesn't blur before selection
+  sugBox.querySelectorAll('.sug-item').forEach((el, i) => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      selectGuest(matches[i].guest.name);
+    });
+  });
   sugBox.style.display = 'block';
 });
 
-document.addEventListener('click', e => {
+document.addEventListener('mousedown', e => {
   if (!e.target.closest('.input-wrap')) sugBox.style.display='none';
 });
 
@@ -386,6 +426,13 @@ function lookup() {
 }
 
 function showResult(g) {
+  const tablemates = guests.filter(x => x.table === g.table && x.name !== g.name);
+  const tameplatesHTML = tablemates.length
+    ? `<div class="tablemates">
+         <div class="tablemates-label">Also at your table</div>
+         ${tablemates.map(x => `<div class="tablemate">${x.name}</div>`).join('')}
+       </div>`
+    : '';
   document.getElementById('result').innerHTML =
     `<div class="sep"></div>
      <div class="result-found">
@@ -396,6 +443,7 @@ function showResult(g) {
          <div class="table-num">${g.table}</div>
          ${g.tableName ? `<div class="table-name-display">${g.tableName}</div>` : ''}
        </div>
+       ${tameplatesHTML}
      </div>`;
 }
 
