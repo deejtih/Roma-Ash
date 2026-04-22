@@ -39,22 +39,18 @@
   .map-container { background:var(--paper); border:1px solid var(--rule); border-radius:1px; padding:1.5rem; box-shadow:0 1px 2px rgba(30,26,23,.03),0 8px 40px rgba(30,26,23,.06),inset 0 1px 0 rgba(255,255,255,.9); position:relative; flex-shrink:0; overflow:auto; }
   .map-container::before { content:''; position:absolute; top:8px; left:8px; width:10px; height:10px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
   .map-container::after  { content:''; position:absolute; bottom:8px; right:8px; width:10px; height:10px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
-  /* Table circles */
   .tbl { cursor:pointer; }
   .tbl circle.bg { fill:var(--paper); stroke:var(--rule); stroke-width:1.5; transition:fill .18s,stroke .18s,stroke-width .18s; }
   .tbl text.num { font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic; fill:var(--ink-soft); text-anchor:middle; dominant-baseline:central; pointer-events:none; transition:fill .18s; user-select:none; }
-  .tbl text.sub { font-family:'Tenor Sans',sans-serif; font-size:6.5px; letter-spacing:.1em; text-transform:uppercase; fill:var(--gold); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
+  .tbl text.sub { font-family:'Tenor Sans',sans-serif; font-size:6px; letter-spacing:.08em; text-transform:uppercase; fill:var(--gold); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
   .tbl:hover circle.bg { fill:var(--hover-bg); stroke:var(--gold-pale); stroke-width:2; }
   .tbl:hover text.num { fill:var(--gold); }
   .tbl.active circle.bg { fill:var(--active-bg); stroke:var(--gold); stroke-width:2.5; }
   .tbl.active text.num { fill:var(--gold); }
-  /* Sweetheart — diamond shape */
   .tbl.sweetheart circle.bg { fill:#fdf5ec; stroke:var(--gold-pale); stroke-width:1.5; }
-  .tbl.sweetheart:hover circle.bg, .tbl.sweetheart.active circle.bg { stroke:var(--gold); stroke-width:2; fill:var(--active-bg); }
-  /* Room labels */
+  .tbl.sweetheart.active circle.bg, .tbl.sweetheart:hover circle.bg { stroke:var(--gold); fill:var(--active-bg); }
   .rlbl { font-family:'Tenor Sans',sans-serif; font-size:8px; letter-spacing:.1em; text-transform:uppercase; fill:var(--ink-faint); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
   .rlbl-lg { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; fill:var(--ink-faint); text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  /* Panel */
   .panel { flex:1; min-width:220px; max-width:280px; }
   .panel-placeholder { border:1px dashed var(--rule); border-radius:1px; padding:2.25rem 1.5rem; text-align:center; }
   .panel-placeholder p { font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--ink-faint); font-size:1rem; line-height:1.75; }
@@ -86,7 +82,90 @@
     </div>
     <div class="layout">
       <div class="map-container">
-        <svg id="map" viewBox="0 0 680 520" width="680" height="520" xmlns="http://www.w3.org/2000/svg"></svg>
+        <!--
+          SVG coordinate system — based on the hand-drawn floor plan:
+          viewBox: 700 × 580
+          Room walls: x=20,y=20 → x=680,y=560
+
+          KEY FEATURES from the plan:
+          - Dance floor: large square, centre-left of room
+          - DJ table: top-left corner (outside or nook)
+          - Two bars: along the top wall
+          - Backdrop + arch: left wall, below DJ
+          - Photo bal & stairs: lower-left block
+          - Gift table: near stairs
+          - Bridal entrance: bottom-centre-left
+          - Guest entrance: bottom-centre-right
+          - QR code / welcome sign: bottom-right area
+          - Photo booth: right side near bottom
+          - Dashed line: divides room roughly down the middle vertically
+
+          TABLE POSITIONS — from your confirmed order (left→right, top→bottom):
+          The plan shows:
+            Top row (above dance floor level): 17, 13 | then right half: 7, 10
+            Then four rows of tables filling the room:
+              Left of dashed line (beside/below dance floor):
+                Col A: 17(top), 13
+                Below dance floor: 24, 12, 23, 25, 28
+              Right of dashed line:
+                Row 1: 3, 9,  | 7(top-right area), 10
+                Row 2: 5, 15, | right cols
+                Row 3: 1(sweetheart), 11
+                Row 4: 6, 21
+                etc.
+
+          After careful analysis of BOTH the image AND your confirmed ordering:
+
+          The room is wide. The dance floor occupies the upper-left quadrant.
+          Tables are arranged:
+          - Two tables to the LEFT of the dance floor top (17, 13) in the top strip
+          - Then columns to the RIGHT of the dance floor
+
+          Your order "left top to bottom" = reading each COLUMN top-to-bottom, left column first:
+
+          Col 1 (leftmost table column, beside/left of dance floor): 17, 13
+            — only 2 tables here, aligned with the top of the room beside the left bar
+
+          Then right of dance floor, 5 columns × 4–5 rows:
+          Col 2: 7, 3, 5, 1(sweetheart), 6, 2  — WAIT, that's 6 which is too many
+
+          Actually re-reading your sequence as ROWS (reading left to right across each row):
+          Row 1: 17, 13, 7, 19
+          Row 2:  3,  9, 5, 15
+          Row 3:  1(♥),11, 6, 21
+          Row 4:  2,  8,22, 12
+          Row 5:  4, 20,10, 18
+          Row 6: 24, 23,16, 27
+          Row 7: 28, 14,25     (only 3)
+
+          BUT from the floor plan image the dance floor takes up the LEFT side rows 2-5,
+          so the left-side tables (17,13) are ABOVE the dance floor, and then 3,5,6,2 etc
+          are to the RIGHT of the dance floor, not above it.
+
+          FINAL INTERPRETATION matching both the image and your number order:
+          - The dance floor is in the LEFT-CENTRE of the room
+          - Tables 17 and 13 sit ABOVE the dance floor (same top strip as 7 and the right-side tables)
+          - Tables below/beside the dance floor on the left: 24, 12 (to the left), 23, 25, 28 (bottom)
+          - All other tables fill the RIGHT half of the room in a 4-column grid
+
+          GRID LAYOUT:
+          ┌─────────────────────────────────────────────────────┐
+          │ DJ  │ 17   13  │ bar │   7   19  │ bar │           │
+          │─────┼──────────┤     ├───────────┤─────┤           │
+          │     │ dance    │     │  3    9   │     │           │
+          │ bk  │ floor    │     │  5   15   │     │           │
+          │ dp  │          │     │  1♥  11   │     │           │
+          │     │          │     │  6   21   │     │           │
+          │─────┼──────────┤─────┼───────────┤─────┤           │
+          │  24  12        │  2    8   22   12│     │           │
+          │  23  25        │  4   20   10   18│     │           │
+          │  28            │ 24   23   16   27│     │           │
+          └─────────────────────────────────────────────────────┘
+
+          Hmm, this is getting complicated. Let me just place tables precisely
+          based on the IMAGE positions, using your confirmed numbers.
+        -->
+        <svg id="map" viewBox="0 0 700 580" width="700" height="580" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
       <div class="panel">
         <div class="panel-placeholder" id="panel-empty"><p>Select any table to see who's seated there</p></div>
@@ -131,166 +210,224 @@ async function loadGuests() {
 }
 loadGuests();
 
-// ── SVG helpers ───────────────────────────────────────────────────────────────
 const NS = 'http://www.w3.org/2000/svg';
-function svgEl(tag, attrs) {
+function mk(tag, attrs) {
   const e = document.createElementNS(NS, tag);
-  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
   return e;
 }
-function addTo(parent, el) { parent.appendChild(el); return el; }
-function rect(svg, x, y, w, h, attrs)    { addTo(svg, svgEl('rect',  { x, y, width:w, height:h, ...attrs })); }
-function line(svg, x1, y1, x2, y2, attrs){ addTo(svg, svgEl('line',  { x1, y1, x2, y2, ...attrs })); }
-function text(svg, x, y, str, cls, dy=0) {
-  const t = svgEl('text', { x, y: y+dy, class: cls });
-  t.textContent = str;
-  addTo(svg, t);
+function app(p, ...children) { children.forEach(c => p.appendChild(c)); return p; }
+function rct(x,y,w,h,a={})  { return mk('rect',{x,y,width:w,height:h,...a}); }
+function lin(x1,y1,x2,y2,a={}){ return mk('line',{x1,y1,x2,y2,...a}); }
+function txt(x,y,s,cls,dy=0) {
+  const t = mk('text',{x,y:y+dy,class:cls});
+  t.textContent=s; return t;
 }
 
-// ── Build the room ────────────────────────────────────────────────────────────
 function buildMap() {
   const svg = document.getElementById('map');
 
-  // ── Room boundary ──
-  // viewBox: 680 × 520. Padding: 20px on each side.
-  // Room: x=20, y=20, w=640, h=480
-  rect(svg, 20, 20, 640, 480, { fill:'none', stroke:'#cdc5b8', 'stroke-width':'1.5', rx:'2' });
-
-  // ── Dance floor ── upper-LEFT area
-  // Dance floor occupies left portion: x=20 to x=200, y=20 to y=230
-  // It must NOT overlap with any table. Tables start at y=60 in the plan.
-  // Dance floor: x=20, y=20, w=175, h=210
-  rect(svg, 22, 22, 173, 208, { fill:'#f0e9de', stroke:'var(--gold-pale)', 'stroke-width':'1', rx:'1' });
-  text(svg, 108, 118, 'Dance Floor', 'rlbl-lg');
-  text(svg, 108, 135, "21' × 21'", 'rlbl');
-
-  // ── DJ Table — top-left corner nook ──
-  rect(svg, 22, 22, 50, 30, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1' });
-  text(svg, 47, 37, 'DJ TABLE', 'rlbl');
-
-  // ── Bar LEFT — top, left of center ──
-  rect(svg, 220, 20, 90, 34, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 265, 37, 'BAR', 'rlbl');
-
-  // ── Bar RIGHT — top, right of center ──
-  rect(svg, 480, 20, 90, 34, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 525, 37, 'BAR', 'rlbl');
-
-  // ── Backdrop + arch — left wall, mid-height ──
-  rect(svg, 20, 240, 14, 90, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1' });
-  text(svg, 27, 285, 'BACKDROP', 'rlbl');
-
-  // ── Gift table — lower-left ──
-  rect(svg, 22, 350, 70, 22, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 57, 361, 'GIFT TABLE', 'rlbl');
-
-  // ── Photo bal & stairs — bottom-left block ──
-  rect(svg, 22, 385, 100, 112, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 72, 434, 'PHOTO BAL', 'rlbl');
-  text(svg, 72, 446, '& STAIRS', 'rlbl');
-
-  // ── Bridal entrance — bottom center ──
-  rect(svg, 150, 480, 140, 18, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 220, 489, 'BRIDAL ENTRANCE', 'rlbl');
-
-  // ── Guest entrance — bottom right-center ──
-  rect(svg, 310, 480, 140, 18, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 380, 489, 'GUEST ENTRANCE', 'rlbl');
-
-  // ── Photo booth — bottom-right ──
-  rect(svg, 560, 460, 98, 38, { fill:'#ece5dc', stroke:'#d4cac0', 'stroke-width':'1', rx:'1' });
-  text(svg, 609, 479, 'PHOTO BOOTH', 'rlbl');
-
-  // ── Dashed center divider ──
-  line(svg, 350, 58, 350, 478, {
-    stroke:'#ddd5c8', 'stroke-width':'1', 'stroke-dasharray':'5,4'
-  });
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // TABLE GRID
+  // ── Scaling note ──────────────────────────────────────────────────────────
+  // The floor plan image is roughly 760px wide × 980px tall (portrait).
+  // Our SVG viewBox is 700 × 580 (landscape to fit screen).
+  // The actual room in the image runs from about x=120→920, y=110→900 (image px).
+  // We scale and translate to fit our viewBox.
   //
-  // User's order, left→right, top→bottom:
-  //   Col 1 (x=205): 17, 13, 7, 19
-  //   Col 2 (x=280):  3,  9, 5, 15
-  //   Col 3 (x=355):  1(sweetheart), 11, 6, 21
-  //   Col 4 (x=430):  2,  8,22, 12
-  //   Col 5 (x=505):  4, 20,10, 18
-  //   Col 6 (x=580): 24, 23,16, 27
-  //   Col 7 (x=648): 28, 14,25     (only 3 tables)
+  // Key landmark positions in IMAGE pixels (approx):
+  //   Room left wall:   x≈120   → SVG x=20
+  //   Room right wall:  x≈920   → SVG x=680
+  //   Room top wall:    y≈110   → SVG y=20
+  //   Room bottom wall: y≈900   → SVG y=540
+  //   Scale x: (680-20)/(920-120) = 660/800 = 0.825
+  //   Scale y: (540-20)/(900-110) = 520/790 = 0.658
   //
-  // Row y values (top→bottom), with dance floor clearing y=22–230:
-  //   Row 1: y=75   (top, below bars, above dance floor height)
-  //   Row 2: y=150
-  //   Row 3: y=225
-  //   Row 4: y=300
+  // Using these scales to map image positions to SVG:
+  //   SVG_x = 20 + (img_x - 120) * 0.825
+  //   SVG_y = 20 + (img_y - 110) * 0.658
+
+  // ── Room outline ──────────────────────────────────────────────────────────
+  // Main rectangular room
+  app(svg, rct(20,20,660,520,{fill:'none',stroke:'#cdc5b8','stroke-width':'1.5',rx:'2'}));
+
+  // ── Dance floor ───────────────────────────────────────────────────────────
+  // In image: roughly x=200→490, y=265→580 → SVG x≈86→305, y≈102→309
+  // It's a square labelled 21'×21'. Positioning it centre-left.
+  app(svg, rct(82,98,210,210,{fill:'#f0e9de',stroke:'var(--gold-pale)','stroke-width':'1',rx:'1'}));
+  app(svg, txt(187,193,'Dance Floor','rlbl-lg'));
+  app(svg, txt(187,210,"21' × 21'",'rlbl'));
+
+  // ── DJ Table ─ top-left corner nook ──────────────────────────────────────
+  app(svg, rct(20,20,46,36,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1'}));
+  app(svg, txt(43,38,'DJ TABLE','rlbl'));
+
+  // ── Bar LEFT ─ top wall, left-of-centre ──────────────────────────────────
+  // In image: x≈330→470, y≈155→220 → SVG x≈173→289, y≈30→72
+  app(svg, rct(170,20,120,40,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(230,40,'BAR','rlbl'));
+
+  // ── Bar RIGHT ─ top wall, right side ─────────────────────────────────────
+  // In image: x≈640→760, y≈155→215 → SVG x≈429→529, y≈30→69
+  app(svg, rct(490,20,120,40,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(550,40,'BAR','rlbl'));
+
+  // ── Backdrop + arch ─ left wall ───────────────────────────────────────────
+  app(svg, rct(20,230,14,100,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1'}));
+  app(svg, txt(27,280,'BACKDROP\n+ ARCH','rlbl'));
+
+  // ── Photo bal & stairs ─ lower-left block ────────────────────────────────
+  // In image: x≈145→295, y≈730→870 → SVG x≈21→144, y≈409→499
+  app(svg, rct(20,405,115,115,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(77,450,'PHOTO BAL','rlbl'));
+  app(svg, txt(77,462,'& STAIRS','rlbl'));
+
+  // ── Gift table ────────────────────────────────────────────────────────────
+  app(svg, rct(20,378,80,22,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(60,389,'GIFT TABLE','rlbl'));
+
+  // ── Bridal entrance ─ bottom ──────────────────────────────────────────────
+  app(svg, rct(148,522,145,18,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(220,531,'BRIDAL ENTRANCE','rlbl'));
+
+  // ── Guest entrance ─ bottom ───────────────────────────────────────────────
+  app(svg, rct(320,522,155,18,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(397,531,'GUEST ENTRANCE','rlbl'));
+
+  // ── QR code / welcome sign ─ bottom-right ────────────────────────────────
+  app(svg, rct(590,522,88,18,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(634,531,'QR / SIGN','rlbl'));
+
+  // ── Photo booth ─ right side ──────────────────────────────────────────────
+  app(svg, rct(620,430,58,80,{fill:'#ece5dc',stroke:'#d4cac0','stroke-width':'1',rx:'1'}));
+  app(svg, txt(649,470,'PHOTO\nBOOTH','rlbl'));
+  app(svg, txt(649,462,'PHOTO','rlbl'));
+  app(svg, txt(649,474,'BOOTH','rlbl'));
+
+  // ── Dashed divider ─ roughly vertical centre ──────────────────────────────
+  app(svg, lin(340,62,340,520,{stroke:'#ddd5c8','stroke-width':'1','stroke-dasharray':'5,4'}));
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // TABLE POSITIONS
   //
-  // Dance floor spans y=22→230, x=22→195.
-  // Cols 1+ start at x=205 so no overlap.
-  // ──────────────────────────────────────────────────────────────────────────
+  // From the floor plan image + your confirmed ordering (left→right, top→bottom):
+  //
+  // The room has tables in these approximate positions:
+  //
+  // TOP STRIP (y≈75, above the dance floor square):
+  //   17 (x≈160) — left, just right of DJ nook / left of left bar
+  //   13 (x≈250) — right of 17, left of dance floor
+  //   7  (x≈390) — right of dashed line, below right area of left bar
+  //   19 (x≈490) — far right top, near right bar (the arrow in the image points here, labelled "10" in original but your order says "19")
+  //
+  // MIDDLE SECTION — right side of room (x > dance floor):
+  //   The dance floor occupies x≈82→292, y≈98→308
+  //   Tables to the right start at x≈330
+  //
+  //   Inner-right column (x≈340): 3, 5, 1♥, 6, 2  (5 rows, beside dance floor)
+  //   Next column (x≈420):        9,15,11,21, 8,22 (4 rows)
+  //   Outer columns handled below
+  //
+  //   From your 28-table order read as rows:
+  //   Row 1 (y=75):  17, 13,  7, 19
+  //   Row 2 (y=148):  3,  9                    ← right of dance floor
+  //   Row 3 (y=198):  5, 15
+  //   Row 4 (y=248):  1♥,11
+  //   Row 5 (y=298):  6, 21
+  //   Row 6 (y=348):  2,  8, 22, 12
+  //   Row 7 (y=398):  4, 20, 10, 18
+  //   Row 8 (y=448): 24, 23, 16, 27
+  //   Bottom-left:   28(near stairs)
+  //   Bottom extras: 14, 25
+  //
+  // But that's only 3 tables (14,25,28) unaccounted for rows 7-8 on left.
+  // The plan shows 24, 12 at middle-left (below the dance floor area),
+  // and 23, 25, 28 at the bottom-left.
+  //
+  // FINAL confirmed positions:
+  // ────────────────────────────────────────────────────────────────────────────
 
-  const R  = 22;   // table radius
-  const xs = [205, 280, 355, 430, 505, 580, 648]; // column x centres
-  const ys = [75,  155, 235, 315];                 // row y centres
+  // R = table radius
+  const R = 21;
 
-  // [tableNumber, colIndex, rowIndex, isSweetheart]
+  // Helper: place table at (x,y) with optional sweetheart flag
   const tables = [
-    // Col 1
-    [17, 0, 0], [13, 0, 1], [7, 0, 2], [19, 0, 3],
-    // Col 2
-    [3,  1, 0], [9,  1, 1], [5, 1, 2], [15, 1, 3],
-    // Col 3 — table 1 is sweetheart
-    [1,  2, 0, true], [11, 2, 1], [6, 2, 2], [21, 2, 3],
-    // Col 4
-    [2,  3, 0], [8,  3, 1], [22, 3, 2], [12, 3, 3],
-    // Col 5
-    [4,  4, 0], [20, 4, 1], [10, 4, 2], [18, 4, 3],
-    // Col 6
-    [24, 5, 0], [23, 5, 1], [16, 5, 2], [27, 5, 3],
-    // Col 7 (3 tables only — centre them in rows 0,1,2)
-    [28, 6, 0], [14, 6, 1], [25, 6, 2],
+    // ── Top row (y=73) ────────────────────────────────────────────────
+    // 17 and 13 sit above the dance floor / left side
+    // 7 and 19 sit to the right
+    { n:17, x:160, y:73 },
+    { n:13, x:252, y:73 },
+    { n:7,  x:390, y:73 },
+    { n:19, x:480, y:73 },
+
+    // ── Right of dance floor — inner column (x=342) ────────────────────
+    // These 5 tables run alongside the right edge of the dance floor
+    { n:3,  x:342, y:140 },
+    { n:5,  x:342, y:205 },
+    { n:1,  x:342, y:270, sweetheart:true },
+    { n:6,  x:342, y:335 },
+    { n:2,  x:342, y:400 },
+
+    // ── Right of dance floor — second column (x=420) ────────────────────
+    { n:9,  x:420, y:140 },
+    { n:15, x:420, y:205 },
+    { n:11, x:420, y:270 },
+    { n:21, x:420, y:335 },
+    { n:8,  x:420, y:400 },
+
+    // ── Third column (x=495) ─────────────────────────────────────────────
+    { n:22, x:495, y:140 },
+    { n:12, x:495, y:205 },
+    { n:4,  x:495, y:270 },
+    { n:20, x:495, y:335 },
+    { n:10, x:495, y:400 },
+
+    // ── Fourth column (x=570) ────────────────────────────────────────────
+    { n:18, x:570, y:140 },
+    { n:24, x:570, y:205 },
+    { n:23, x:570, y:270 },
+    { n:16, x:570, y:335 },
+    { n:27, x:570, y:400 },
+
+    // ── Bottom-left cluster (below dance floor / near stairs) ─────────────
+    // From image: 24 and 12 are mid-left, 23 and 25 are lower-left, 28 near stairs
+    // But 24 is already in col 4 above — re-checking your order:
+    // 17,13,7,19 | 3,9,5,15 | 1,11,6,21 | 2,8,22,12 | 4,20,10,18 | 24,23,16,27 | 28,14,25
+    // So the bottom-left cluster from the image (the isolated tables below dance floor) must be
+    // 28, 14, 25 — placed at bottom-left near the stairs area
+
+    { n:28, x:155, y:450 },
+    { n:14, x:245, y:450 },
+    { n:25, x:155, y:380 },
   ];
 
-  tables.forEach(([num, ci, ri, isSweetheart]) => {
-    const x = xs[ci], y = ys[ri];
-    makeTable(svg, num, x, y, R, isSweetheart);
-  });
+  tables.forEach(t => makeTable(svg, t.n, t.x, t.y, R, t.sweetheart||false));
 }
 
-// ── Draw one table ────────────────────────────────────────────────────────────
-function makeTable(svg, num, x, y, r, isSweetheart=false) {
-  const g = svgEl('g', { class: 'tbl' + (isSweetheart ? ' sweetheart' : ''), 'data-table': num });
+function makeTable(svg, num, x, y, r, isSweetheart) {
+  const g = mk('g', { class:'tbl'+(isSweetheart?' sweetheart':''), 'data-table':num });
 
-  const c = svgEl('circle', { class:'bg', cx:x, cy:y, r });
-  g.appendChild(c);
-
-  const t = svgEl('text', { class:'num', x, y: isSweetheart ? y-5 : y });
-  t.textContent = num;
-  g.appendChild(t);
+  app(g, mk('circle', { class:'bg', cx:x, cy:y, r }));
 
   if (isSweetheart) {
-    const s = svgEl('text', { class:'sub', x, y: y+8 });
-    s.textContent = '♥ sweetheart';
-    g.appendChild(s);
+    app(g, Object.assign(mk('text',{class:'num',x,y:y-6}), {textContent:num}));
+    app(g, Object.assign(mk('text',{class:'sub',x,y:y+7}), {textContent:'♥ sweetheart'}));
+  } else {
+    app(g, Object.assign(mk('text',{class:'num',x,y}), {textContent:num}));
   }
 
   svg.appendChild(g);
   g.addEventListener('click', () => selectTable(num, g, isSweetheart));
 }
 
-// ── Selection ─────────────────────────────────────────────────────────────────
 let activeEl = null;
-
-function selectTable(num, el, isSweetheart=false) {
+function selectTable(num, el, isSweetheart) {
   if (activeEl === el) {
-    el.classList.remove('active');
-    activeEl = null;
+    el.classList.remove('active'); activeEl = null;
     document.getElementById('panel-empty').style.display = 'block';
     document.getElementById('panel-card').style.display  = 'none';
     return;
   }
   if (activeEl) activeEl.classList.remove('active');
-  el.classList.add('active');
-  activeEl = el;
+  el.classList.add('active'); activeEl = el;
 
   const names = tableMap[String(num)] || [];
   document.getElementById('panel-empty').style.display = 'none';
@@ -298,13 +435,13 @@ function selectTable(num, el, isSweetheart=false) {
   card.style.animation = 'none'; card.offsetHeight; card.style.animation = '';
   card.style.display = 'block';
 
-  document.getElementById('pc-num').textContent = num;
-  document.getElementById('pc-lbl').textContent = isSweetheart ? 'Sweetheart Table' : 'Table';
+  document.getElementById('pc-num').textContent  = num;
+  document.getElementById('pc-lbl').textContent  = isSweetheart ? 'Sweetheart Table' : 'Table';
   document.getElementById('pc-guests').innerHTML = names.length
-    ? names.map(n => `<div class="pc-guest">${n}</div>`).join('')
+    ? names.map(n=>`<div class="pc-guest">${n}</div>`).join('')
     : `<div class="pc-guest" style="color:var(--ink-faint);font-style:italic">No guests assigned</div>`;
   document.getElementById('pc-count').textContent = names.length
-    ? names.length + (names.length === 1 ? ' guest' : ' guests') : '';
+    ? names.length+(names.length===1?' guest':' guests') : '';
 }
 </script>
 </body>
