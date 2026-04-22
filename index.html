@@ -292,7 +292,7 @@ let guests = [];
 
 async function loadGuests() {
   try {
-    const res = await fetch('guests.xlsx');
+    const res = await fetch('guests.xlsx?v=' + Date.now());
     if (!res.ok) throw new Error('Not found');
     const buf = await res.arrayBuffer();
     const wb = XLSX.read(buf, {type:'array'});
