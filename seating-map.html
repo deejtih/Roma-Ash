@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seating Map · Roma &amp; Ashith</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:        #1e1a17;
+    --ink-mid:    #6b5d54;
+    --ink-soft:   #a89890;
+    --ink-faint:  #cfc5be;
+    --parchment:  #f7f3ee;
+    --paper:      #fdfbf8;
+    --gold:       #b8975a;
+    --gold-pale:  #e8d9bc;
+    --rule:       #ece5dc;
+    --rule-soft:  #f3ede6;
+    --hover-bg:   #f5ede3;
+    --active-bg:  #f0e4d4;
+  }
+
+  body {
+    font-family: 'Tenor Sans', sans-serif;
+    background: var(--parchment);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 3rem 1.5rem 5rem;
+    color: var(--ink); position: relative; overflow-x: hidden;
+  }
+
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image: repeating-linear-gradient(
+      0deg,transparent,transparent 39px,
+      rgba(184,151,90,.06) 39px,rgba(184,151,90,.06) 40px
+    );
+    pointer-events:none; z-index:0;
+  }
+
+  .corner { position:fixed; width:56px; height:56px; pointer-events:none; z-index:0; }
+  .corner-tl { top:1.5rem; left:1.5rem; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .corner-tr { top:1.5rem; right:1.5rem; border-top:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+  .corner-bl { bottom:1.5rem; left:1.5rem; border-bottom:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .corner-br { bottom:1.5rem; right:1.5rem; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+
+  #loading-msg {
+    font-size:.65rem; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--ink-faint); position:relative; z-index:1;
+    animation: pulse 1.8s ease-in-out infinite; margin-top:6rem;
+  }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  #app {
+    display:none; width:100%; flex-direction:column; align-items:center;
+    position:relative; z-index:1;
+    animation: rise .7s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  @keyframes rise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+
+  /* Nav */
+  .nav-back {
+    align-self:flex-start;
+    font-size:.58rem; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--ink-soft); text-decoration:none;
+    border-bottom:1px solid var(--rule); padding-bottom:.2rem;
+    margin-bottom:2.5rem; transition:color .2s,border-color .2s;
+  }
+  .nav-back:hover { color:var(--gold); border-color:var(--gold-pale); }
+
+  /* Header */
+  .header { text-align:center; margin-bottom:2rem; }
+  .pre-title {
+    font-size:.6rem; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:.8rem; display:block;
+  }
+  h1 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(2.8rem,8vw,4.2rem);
+    font-weight:300; font-style:italic;
+    color:var(--ink); line-height:.92; margin-bottom:.7rem;
+  }
+  .subtitle {
+    font-size:.6rem; letter-spacing:.28em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+
+  .ornament {
+    display:flex; align-items:center; gap:.8rem;
+    margin:0 auto 2.5rem; max-width:240px; width:100%;
+  }
+  .ornament-line { flex:1; height:1px; background:linear-gradient(to right,transparent,var(--gold-pale),transparent); }
+  .ornament-gem { color:var(--gold); font-size:9px; }
+
+  /* Layout */
+  .layout {
+    display:flex; gap:2.5rem; align-items:flex-start;
+    width:100%; max-width:960px; flex-wrap:wrap; justify-content:center;
+  }
+
+  /* Map container */
+  .map-container {
+    background:var(--paper);
+    border:1px solid var(--rule); border-radius:1px;
+    padding:1.5rem;
+    box-shadow:0 1px 2px rgba(30,26,23,.03),0 8px 40px rgba(30,26,23,.06),
+               inset 0 1px 0 rgba(255,255,255,.9);
+    position:relative; flex-shrink:0;
+  }
+  .map-container::before { content:''; position:absolute; top:8px; left:8px; width:10px; height:10px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .map-container::after  { content:''; position:absolute; bottom:8px; right:8px; width:10px; height:10px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+
+  #map { display:block; }
+
+  /* SVG tables */
+  .tbl { cursor:pointer; }
+  .tbl circle.bg {
+    fill:var(--paper); stroke:var(--rule); stroke-width:1.5;
+    transition:fill .18s,stroke .18s,stroke-width .18s;
+  }
+  .tbl text {
+    font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic;
+    fill:var(--ink-soft); text-anchor:middle; dominant-baseline:central;
+    pointer-events:none; transition:fill .18s; user-select:none;
+  }
+  .tbl:hover circle.bg { fill:var(--hover-bg); stroke:var(--gold-pale); stroke-width:2; }
+  .tbl:hover text { fill:var(--gold); }
+  .tbl.active circle.bg { fill:var(--active-bg); stroke:var(--gold); stroke-width:2.5; }
+  .tbl.active text { fill:var(--gold); font-weight:400; }
+
+  .floor-label {
+    font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic;
+    fill:var(--ink-faint); text-anchor:middle; dominant-baseline:central;
+    pointer-events:none; user-select:none; letter-spacing:.08em;
+  }
+
+  /* Panel */
+  .panel { flex:1; min-width:220px; max-width:280px; }
+
+  .panel-placeholder {
+    border:1px dashed var(--rule); border-radius:1px;
+    padding:2.25rem 1.5rem; text-align:center;
+  }
+  .panel-placeholder p {
+    font-family:'Cormorant Garamond',serif; font-style:italic;
+    color:var(--ink-faint); font-size:1rem; line-height:1.75;
+  }
+
+  .panel-card {
+    background:var(--paper); border:1px solid var(--rule); border-radius:1px;
+    padding:1.75rem 1.5rem; display:none;
+    animation:rise .3s ease both;
+    position:relative;
+    box-shadow:0 4px 24px rgba(30,26,23,.06);
+  }
+  .panel-card::before { content:''; position:absolute; top:8px; left:8px; width:8px; height:8px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
+  .panel-card::after  { content:''; position:absolute; bottom:8px; right:8px; width:8px; height:8px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
+
+  .pc-num {
+    font-family:'Cormorant Garamond',serif;
+    font-size:3.5rem; font-weight:300; color:var(--gold); line-height:1;
+    margin-bottom:.1rem;
+  }
+  .pc-lbl {
+    font-size:.56rem; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:1.25rem;
+  }
+  .pc-sep { height:1px; background:linear-gradient(to right,transparent,var(--rule),transparent); margin-bottom:1.1rem; }
+  .pc-guests-lbl {
+    font-size:.56rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:.55rem;
+  }
+  .pc-guest {
+    font-family:'Cormorant Garamond',serif;
+    font-size:1rem; color:var(--ink-soft); line-height:1.8;
+  }
+  .pc-count {
+    font-size:.56rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-faint); margin-top:.85rem;
+  }
+
+  @media (max-width:620px) {
+    .panel { max-width:100%; width:100%; }
+    .layout { gap:1.5rem; }
+    #map { width:320px !important; height:320px !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <p id="loading-msg">Loading guest list…</p>
+
+  <div id="app">
+    <a href="index.html" class="nav-back">← Back to find my seat</a>
+
+    <div class="header">
+      <span class="pre-title">Reception layout</span>
+      <h1>Seating Map</h1>
+      <p class="subtitle">Roma &amp; Ashith &middot; April 25, 2026</p>
+    </div>
+
+    <div class="ornament">
+      <div class="ornament-line"></div>
+      <span class="ornament-gem">✦</span>
+      <div class="ornament-line"></div>
+    </div>
+
+    <div class="layout">
+      <div class="map-container">
+        <svg id="map" viewBox="0 0 520 520" width="460" height="460" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="panel">
+        <div class="panel-placeholder" id="panel-empty">
+          <p>Select any table to see who's seated there</p>
+        </div>
+        <div class="panel-card" id="panel-card">
+          <div class="pc-num" id="pc-num"></div>
+          <div class="pc-lbl">Table</div>
+          <div class="pc-sep"></div>
+          <div class="pc-guests-lbl">Guests</div>
+          <div id="pc-guests"></div>
+          <div class="pc-count" id="pc-count"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let guests = [];
+let tableMap = {};
+
+async function loadGuests() {
+  try {
+    const res = await fetch('guests.xlsx?v=' + Date.now());
+    if(!res.ok) throw new Error();
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    guests = rows.map(r=>({
+      name:  String(r['Full Name']    ||'').trim(),
+      table: String(r['Table Number'] ||'').trim(),
+    })).filter(g=>g.name&&g.table);
+
+    tableMap = {};
+    guests.forEach(g=>{
+      if(!tableMap[g.table]) tableMap[g.table]=[];
+      tableMap[g.table].push(g.name);
+    });
+
+    document.getElementById('loading-msg').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    buildMap();
+  } catch(e) {
+    document.getElementById('loading-msg').textContent = 'Guest list could not be loaded.';
+  }
+}
+loadGuests();
+
+function buildMap() {
+  const svg = document.getElementById('map');
+  const cx=260, cy=260;
+
+  // Dance floor ellipse
+  const ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+  Object.entries({cx,cy,rx:70,ry:50,fill:'#f3ece2',stroke:'#e8d9bc','stroke-width':'1'})
+    .forEach(([k,v])=>ellipse.setAttribute(k,v));
+  svg.appendChild(ellipse);
+
+  // Small decorative dots on dance floor ring
+  for(let i=0;i<12;i++){
+    const a=(2*Math.PI*i/12)-Math.PI/2;
+    const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx', cx + 73*Math.cos(a));
+    dot.setAttribute('cy', cy + 53*Math.sin(a));
+    dot.setAttribute('r','1.5');
+    dot.setAttribute('fill','var(--gold-pale)');
+    svg.appendChild(dot);
+  }
+
+  const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+  label.setAttribute('x',cx); label.setAttribute('y',cy);
+  label.setAttribute('class','floor-label'); label.textContent='Dance Floor';
+  svg.appendChild(label);
+
+  // 28 tables: inner ring 10, outer ring 18
+  const rings = [
+    {count:10, r:128, tr:22},
+    {count:18, r:212, tr:21},
+  ];
+  let n=1;
+  rings.forEach(ring=>{
+    for(let i=0;i<ring.count;i++){
+      const angle = (2*Math.PI*i/ring.count) - Math.PI/2;
+      const tx = cx + ring.r*Math.cos(angle);
+      const ty = cy + ring.r*Math.sin(angle);
+      makeTable(svg, n, tx, ty, ring.tr);
+      n++;
+    }
+  });
+}
+
+function makeTable(svg, num, x, y, r) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','tbl'); g.setAttribute('data-table',num);
+
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('class','bg'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',r);
+
+  const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=num;
+
+  g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+  g.addEventListener('click', ()=>selectTable(num, g));
+}
+
+let activeEl = null;
+
+function selectTable(num, el) {
+  if(activeEl===el){
+    el.classList.remove('active'); activeEl=null;
+    document.getElementById('panel-empty').style.display='block';
+    document.getElementById('panel-card').style.display='none';
+    return;
+  }
+  if(activeEl) activeEl.classList.remove('active');
+  el.classList.add('active'); activeEl=el;
+
+  const names = tableMap[String(num)] || [];
+  document.getElementById('panel-empty').style.display='none';
+
+  const card = document.getElementById('panel-card');
+  card.style.animation='none'; card.offsetHeight; card.style.animation='';
+  card.style.display='block';
+
+  document.getElementById('pc-num').textContent = num;
+  document.getElementById('pc-guests').innerHTML = names.length
+    ? names.map(n=>`<div class="pc-guest">${n}</div>`).join('')
+    : `<div class="pc-guest" style="color:var(--ink-faint);font-style:italic">No guests assigned</div>`;
+  document.getElementById('pc-count').textContent = names.length
+    ? names.length+(names.length===1?' guest':' guests') : '';
+}
+</script>
+</body>
+</html>
