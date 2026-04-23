@@ -15,6 +15,7 @@
     --gold:#b8975a; --gold-pale:#e0cc9e;
     --rule:#ddd5cc; --hover-bg:#f0e6d8; --active-bg:#e8d5bc;
   }
+  html { background:var(--parchment); }
   body { font-family:'Tenor Sans',sans-serif; background:var(--parchment); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:3rem 1.5rem 5rem; color:var(--ink); position:relative; overflow-x:hidden; }
   body::before { content:''; position:fixed; inset:0; background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(184,151,90,.05) 39px,rgba(184,151,90,.05) 40px); pointer-events:none; z-index:0; }
   .corner { position:fixed; width:56px; height:56px; pointer-events:none; z-index:0; }
@@ -182,19 +183,18 @@ function buildMap() {
     lbl(528,34,'BAR','rlbl')
   );
 
-  // ── Entrance 1 ── source: x=312,y=690 w=100,h=30
+  // ── Entrance 1 ──
   add(svg,
-    rct(287,635,92,28,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
-    lbl(333,649,'RECEPTION\nENTRANCE','rlbl-sm'),
-    lbl(333,649,'RECEPTION','rlbl-sm'),
-    lbl(333,661,'ENTRANCE','rlbl-sm')
+    rct(287,630,110,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
+    lbl(342,641,'RECEPTION','rlbl-sm'),
+    lbl(342,653,'ENTRANCE','rlbl-sm')
   );
-  // (remove the double label above - render cleanly)
 
-  // ── Entrance 2 ── source: x=644,y=690 w=100,h=30
+  // ── Entrance 2 ──
   add(svg,
-    rct(592,635,92,28,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
-    lbl(638,649,'GUEST ENT.','rlbl-sm')
+    rct(592,630,100,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
+    lbl(642,641,'GUEST','rlbl-sm'),
+    lbl(642,653,'ENTRANCE','rlbl-sm')
   );
 
   // ── Backdrop / arch — left wall thin strip (source x=22,y=110 w=16,h=210)
