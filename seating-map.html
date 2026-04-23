@@ -197,8 +197,7 @@ function buildMap() {
     lbl(642,653,'ENTRANCE','rlbl-sm')
   );
 
-  // ── Backdrop / arch — centred on dance floor (y=187, h=267 → centre=320)
-  // Backdrop h=267 same as dance floor, y=187 to match
+  // ── Backdrop / arch — centred on dance floor (y=187 h=267)
   add(svg,
     rct(18,187,15,267,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
     lbl(25,300,'BACK','rlbl-sm'),
@@ -206,73 +205,67 @@ function buildMap() {
     lbl(25,324,'+ARCH','rlbl-sm')
   );
 
-  // ── Sweetheart ellipse sits behind table 1
-  add(svg, mk('ellipse',{cx:496,cy:320,rx:38,ry:14,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
+  // ── Sweetheart ellipse behind table 1
+  add(svg, mk('ellipse',{cx:496,cy:231,rx:38,ry:14,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
 
   // ────────────────────────────────────────────────────────────────────────────
-  // TABLE POSITIONS — 4 evenly-spaced columns, uniform row spacing
+  // TABLE POSITIONS
+  // 4 columns, uniform 76px spacing. C2 & C4 staggered +38px (half-row offset)
+  // so adjacent columns interleave visually.
   //
-  // Column x centres:  C1=496  C2=572  C3=648  C4=724
-  // Column spacing: 76px
+  // Dance floor bottom: y=454. Bottom-left cluster starts at y=476.
   //
-  // Row counts per column:
-  //   C1 (3,1♥,2,10,14):   6 tables → rows start y=155, spacing=76
-  //   C2 (7,6,5,4,15,26):  6 tables → rows start y=155, spacing=76  
-  //   C3 (9,11,8,18,25):   5 tables → rows start y=193, spacing=76
-  //   C4 (19,16,21,20,27): 5 tables → rows start y=193, spacing=76
-  //
-  // C3 and C4 have 5 tables so start one row lower to visually centre them
-  // alongside C1/C2's 6 rows.
-  //
-  // Row y values (spacing=76):
-  //   6-row cols: 155, 231, 307, 383, 459, 535
-  //   5-row cols: 193, 269, 345, 421, 497
+  // Col x:  C1=496  C2=572  C3=648  C4=724  (76px apart)
+  // C1/C3 rows (straight):  y = 155, 231, 307, 383, 459, 535
+  // C2/C4 rows (staggered): y = 193, 269, 345, 421, 497       (+38 offset)
   // ────────────────────────────────────────────────────────────────────────────
   const R  = 26;
   const C1 = 496, C2 = 572, C3 = 648, C4 = 724;
-  const Y6 = [155, 231, 307, 383, 459, 535];  // 6-row column y values
-  const Y5 = [193, 269, 345, 421, 497];        // 5-row column y values
+  // Straight rows (C1, C3)
+  const YS = [155, 231, 307, 383, 459, 535];
+  // Staggered rows (C2, C4) — shifted down by 38px
+  const YT = [193, 269, 345, 421, 497];
 
   const tables = [
-    // Top-left pair (17, 13) — above dance floor, evenly spaced
+    // Top-left pair
     { n:'17', x:226, y:118 },
     { n:'13', x:321, y:118 },
 
-    // Col 1: 3, 1♥, 2, 10, 14 — 6 rows
-    { n:'3',  x:C1, y:Y6[0] },
-    { n:'1',  x:C1, y:Y6[1], sw:true },
-    { n:'2',  x:C1, y:Y6[2] },
-    { n:'10', x:C1, y:Y6[3] },
-    { n:'14', x:C1, y:Y6[4] },
+    // Col 1 (straight): 3, 1♥, 2, 10, 14  — 5 tables
+    { n:'3',  x:C1, y:YS[0] },
+    { n:'1',  x:C1, y:YS[1], sw:true },
+    { n:'2',  x:C1, y:YS[2] },
+    { n:'10', x:C1, y:YS[3] },
+    { n:'14', x:C1, y:YS[4] },
 
-    // Col 2: 7, 6, 5, 4, 15, 26 — 6 rows
-    { n:'7',  x:C2, y:Y6[0] },
-    { n:'6',  x:C2, y:Y6[1] },
-    { n:'5',  x:C2, y:Y6[2] },
-    { n:'4',  x:C2, y:Y6[3] },
-    { n:'15', x:C2, y:Y6[4] },
-    { n:'26', x:C2, y:Y6[5] },
+    // Col 2 (staggered): 7, 6, 5, 4, 15, 26  — 5 tables
+    { n:'7',  x:C2, y:YT[0] },
+    { n:'6',  x:C2, y:YT[1] },
+    { n:'5',  x:C2, y:YT[2] },
+    { n:'4',  x:C2, y:YT[3] },
+    { n:'15', x:C2, y:YT[4] },
+    { n:'26', x:C2, y:YT[4]+76 },
 
-    // Col 3: 9, 11, 8, 18, 25 — 5 rows
-    { n:'9',  x:C3, y:Y5[0] },
-    { n:'11', x:C3, y:Y5[1] },
-    { n:'8',  x:C3, y:Y5[2] },
-    { n:'18', x:C3, y:Y5[3] },
-    { n:'25', x:C3, y:Y5[4] },
+    // Col 3 (straight): 9, 11, 8, 18, 25  — 5 tables
+    { n:'9',  x:C3, y:YS[0] },
+    { n:'11', x:C3, y:YS[1] },
+    { n:'8',  x:C3, y:YS[2] },
+    { n:'18', x:C3, y:YS[3] },
+    { n:'25', x:C3, y:YS[4] },
 
-    // Col 4: 19, 16, 21, 20, 27 — 5 rows
-    { n:'19', x:C4, y:Y5[0] },
-    { n:'16', x:C4, y:Y5[1] },
-    { n:'21', x:C4, y:Y5[2] },
-    { n:'20', x:C4, y:Y5[3] },
-    { n:'27', x:C4, y:Y5[4] },
+    // Col 4 (staggered): 19, 16, 21, 20, 27  — 5 tables
+    { n:'19', x:C4, y:YT[0] },
+    { n:'16', x:C4, y:YT[1] },
+    { n:'21', x:C4, y:YT[2] },
+    { n:'20', x:C4, y:YT[3] },
+    { n:'27', x:C4, y:YT[4] },
 
-    // Bottom-left cluster (22, 12, 24, 23, 28)
-    { n:'22', x:146, y:470 },
-    { n:'12', x:226, y:470 },
-    { n:'24', x:146, y:546 },
-    { n:'23', x:226, y:546 },
-    { n:'28', x:186, y:614 },
+    // Bottom-left cluster — clear of dance floor (bottom y=454), start at 476
+    { n:'22', x:146, y:476 },
+    { n:'12', x:226, y:476 },
+    { n:'24', x:146, y:552 },
+    { n:'23', x:226, y:552 },
+    { n:'28', x:186, y:620 },
   ];
 
   tables.forEach(t => drawTable(svg, t.n, t.x, t.y, R, !!t.sw));
