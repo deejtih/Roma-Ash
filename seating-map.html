@@ -161,7 +161,7 @@ function buildMap() {
   svg.setAttribute('height', VH);
 
   // Room boundary (source rect 20,20 w=620 h=740 → scaled)
-  add(svg, rct(18,0,850,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
+  add(svg, rct(18,0,571,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
 
   // ── Dance floor ── source: x=78,y=203 w=276,h=290 → scaled ×0.92
   add(svg,
@@ -197,62 +197,82 @@ function buildMap() {
     lbl(642,653,'ENTRANCE','rlbl-sm')
   );
 
-  // ── Backdrop / arch — left wall thin strip (source x=22,y=110 w=16,h=210)
+  // ── Backdrop / arch — centred on dance floor (y=187, h=267 → centre=320)
+  // Backdrop h=267 same as dance floor, y=187 to match
   add(svg,
-    rct(18,101,15,193,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
-    lbl(25,180,'BACKDROP','rlbl-sm'),
-    lbl(25,192,'+ARCH','rlbl-sm')
+    rct(18,187,15,267,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
+    lbl(25,300,'BACK','rlbl-sm'),
+    lbl(25,312,'DROP','rlbl-sm'),
+    lbl(25,324,'+ARCH','rlbl-sm')
   );
 
-  // ── Sweetheart label at table 1 position (x=495, y=280) — gold ellipse
-  add(svg, mk('ellipse',{cx:495,cy:280,rx:38,ry:14,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
+  // ── Sweetheart ellipse sits behind table 1
+  add(svg, mk('ellipse',{cx:496,cy:320,rx:38,ry:14,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
 
   // ────────────────────────────────────────────────────────────────────────────
-  // TABLE POSITIONS
-  // Decoded from SVG path analysis × 0.92 scale factor.
-  // All 28 tables, uniform radius R=26.
+  // TABLE POSITIONS — 4 evenly-spaced columns, uniform row spacing
+  //
+  // Column x centres:  C1=496  C2=572  C3=648  C4=724
+  // Column spacing: 76px
+  //
+  // Row counts per column:
+  //   C1 (3,1♥,2,10,14):   6 tables → rows start y=155, spacing=76
+  //   C2 (7,6,5,4,15,26):  6 tables → rows start y=155, spacing=76  
+  //   C3 (9,11,8,18,25):   5 tables → rows start y=193, spacing=76
+  //   C4 (19,16,21,20,27): 5 tables → rows start y=193, spacing=76
+  //
+  // C3 and C4 have 5 tables so start one row lower to visually centre them
+  // alongside C1/C2's 6 rows.
+  //
+  // Row y values (spacing=76):
+  //   6-row cols: 155, 231, 307, 383, 459, 535
+  //   5-row cols: 193, 269, 345, 421, 497
   // ────────────────────────────────────────────────────────────────────────────
-  const R = 26;
+  const R  = 26;
+  const C1 = 496, C2 = 572, C3 = 648, C4 = 724;
+  const Y6 = [155, 231, 307, 383, 459, 535];  // 6-row column y values
+  const Y5 = [193, 269, 345, 421, 497];        // 5-row column y values
+
   const tables = [
-    // Top-left cluster (above dance floor)
+    // Top-left pair (17, 13) — above dance floor, evenly spaced
     { n:'17', x:226, y:118 },
-    { n:'13', x:321, y:120 },
+    { n:'13', x:321, y:118 },
 
-    // Main right-side grid — Col 1 (x≈495)
-    { n:'3',  x:495, y:209 },
-    { n:'1',  x:495, y:280, sw:true },
-    { n:'2',  x:495, y:350 },
-    { n:'10', x:498, y:431 },
+    // Col 1: 3, 1♥, 2, 10, 14 — 6 rows
+    { n:'3',  x:C1, y:Y6[0] },
+    { n:'1',  x:C1, y:Y6[1], sw:true },
+    { n:'2',  x:C1, y:Y6[2] },
+    { n:'10', x:C1, y:Y6[3] },
+    { n:'14', x:C1, y:Y6[4] },
 
-    // Col 2 (x≈549)
-    { n:'7',  x:549, y:170 },
-    { n:'6',  x:549, y:247 },
-    { n:'5',  x:549, y:324 },
-    { n:'4',  x:549, y:400 },
-    { n:'15', x:558, y:479 },
-    { n:'26', x:559, y:559 },
+    // Col 2: 7, 6, 5, 4, 15, 26 — 6 rows
+    { n:'7',  x:C2, y:Y6[0] },
+    { n:'6',  x:C2, y:Y6[1] },
+    { n:'5',  x:C2, y:Y6[2] },
+    { n:'4',  x:C2, y:Y6[3] },
+    { n:'15', x:C2, y:Y6[4] },
+    { n:'26', x:C2, y:Y6[5] },
 
-    // Col 3 (x≈610-621)
-    { n:'9',  x:610, y:209 },
-    { n:'11', x:621, y:278 },
-    { n:'8',  x:610, y:368 },
-    { n:'18', x:620, y:445 },
-    { n:'25', x:621, y:527 },
+    // Col 3: 9, 11, 8, 18, 25 — 5 rows
+    { n:'9',  x:C3, y:Y5[0] },
+    { n:'11', x:C3, y:Y5[1] },
+    { n:'8',  x:C3, y:Y5[2] },
+    { n:'18', x:C3, y:Y5[3] },
+    { n:'25', x:C3, y:Y5[4] },
 
-    // Col 4 (x≈685-688)
-    { n:'19', x:685, y:167 },
-    { n:'16', x:687, y:236 },
-    { n:'21', x:688, y:313 },
-    { n:'20', x:688, y:401 },
-    { n:'27', x:685, y:489 },
+    // Col 4: 19, 16, 21, 20, 27 — 5 rows
+    { n:'19', x:C4, y:Y5[0] },
+    { n:'16', x:C4, y:Y5[1] },
+    { n:'21', x:C4, y:Y5[2] },
+    { n:'20', x:C4, y:Y5[3] },
+    { n:'27', x:C4, y:Y5[4] },
 
-    // Bottom-left cluster
-    { n:'14', x:483, y:523 },
-    { n:'22', x:146, y:520 },
-    { n:'12', x:235, y:518 },
-    { n:'24', x:146, y:577 },
-    { n:'23', x:236, y:577 },
-    { n:'28', x:191, y:629 },
+    // Bottom-left cluster (22, 12, 24, 23, 28)
+    { n:'22', x:146, y:470 },
+    { n:'12', x:226, y:470 },
+    { n:'24', x:146, y:546 },
+    { n:'23', x:226, y:546 },
+    { n:'28', x:186, y:614 },
   ];
 
   tables.forEach(t => drawTable(svg, t.n, t.x, t.y, R, !!t.sw));
