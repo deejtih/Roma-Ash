@@ -152,7 +152,7 @@ function lbl(x,y,s,c) { const t=mk('text',{x,y,class:c}); t.textContent=s; retur
 // Source SVG: 960×720. All coordinates below are source × 0.92 (scaled to fit).
 // Room: 20×20 → 640×760 in source → 18×18 → 589×699 scaled.
 
-const VW = 870, VH = 680;
+const VW = 680, VH = 680;
 
 function buildMap() {
   const svg = document.getElementById('map');
@@ -161,7 +161,7 @@ function buildMap() {
   svg.setAttribute('height', VH);
 
   // Room boundary (source rect 20,20 w=620 h=740 → scaled)
-  add(svg, rct(18,0,571,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
+  add(svg, rct(18,0,630,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
 
   // ── Dance floor ── source: x=78,y=203 w=276,h=290 → scaled ×0.92
   add(svg,
@@ -171,31 +171,11 @@ function buildMap() {
   );
 
   // ── Bar LEFT ── source rect: x=197,y=4 w=157,h=66
-  add(svg,
-    rct(181,4,145,60,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(253,34,'BAR','rlbl')
-  );
+  add(svg, rct(181,4,130,50,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}), lbl(246,29,'BAR','rlbl'));
+  add(svg, rct(337,4,130,50,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}), lbl(402,29,'BAR','rlbl'));
 
-  // ── Bar RIGHT ── source rect: x=623,y=4 w=157,h=66  — but SVG is 960 wide
-  // scale: 623×0.92=573, but room ends at 589. Bar right is near right wall.
-  add(svg,
-    rct(456,4,145,60,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(528,34,'BAR','rlbl')
-  );
-
-  // ── Entrance 1 ──
-  add(svg,
-    rct(287,630,110,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
-    lbl(342,641,'RECEPTION','rlbl-sm'),
-    lbl(342,653,'ENTRANCE','rlbl-sm')
-  );
-
-  // ── Entrance 2 ──
-  add(svg,
-    rct(592,630,100,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
-    lbl(642,641,'GUEST','rlbl-sm'),
-    lbl(642,653,'ENTRANCE','rlbl-sm')
-  );
+  add(svg, rct(200,630,110,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}), lbl(255,641,'RECEPTION','rlbl-sm'), lbl(255,653,'ENTRANCE','rlbl-sm'));
+  add(svg, rct(370,630,100,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}), lbl(420,641,'GUEST','rlbl-sm'), lbl(420,653,'ENTRANCE','rlbl-sm'));
 
   // ── Backdrop / arch — centred on dance floor (y=187 h=267)
   add(svg,
@@ -205,67 +185,61 @@ function buildMap() {
     lbl(25,324,'+ARCH','rlbl-sm')
   );
 
-  // ── Sweetheart ellipse behind table 1
-  add(svg, mk('ellipse',{cx:496,cy:231,rx:38,ry:14,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
+  // ── Sweetheart ellipse behind table 1 (C1, YT[1] = 253)
+  add(svg, mk('ellipse',{cx:390,cy:253,rx:36,ry:13,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
 
   // ────────────────────────────────────────────────────────────────────────────
-  // TABLE POSITIONS
-  // 4 columns, uniform 76px spacing. C2 & C4 staggered +38px (half-row offset)
-  // so adjacent columns interleave visually.
-  //
-  // Dance floor bottom: y=454. Bottom-left cluster starts at y=476.
-  //
-  // Col x:  C1=496  C2=572  C3=648  C4=724  (76px apart)
-  // C1/C3 rows (straight):  y = 155, 231, 307, 383, 459, 535
-  // C2/C4 rows (staggered): y = 193, 269, 345, 421, 497       (+38 offset)
+  // TABLE POSITIONS — from live editor
+  // C1=390  C2=456  C3=522  C4=588  (66px apart)
+  // C2 & C4 straight/up:    YS = [140, 220, 300, 380, 460, 540]
+  // C1 & C3 staggered/down: YT = [173, 253, 333, 413, 493, 573]
+  // Stagger = 33px. Last column (C4) is up.
   // ────────────────────────────────────────────────────────────────────────────
-  const R  = 26;
-  const C1 = 496, C2 = 572, C3 = 648, C4 = 724;
-  // Straight rows (C1, C3)
-  const YS = [155, 231, 307, 383, 459, 535];
-  // Staggered rows (C2, C4) — shifted down by 38px
-  const YT = [193, 269, 345, 421, 497];
+  const R  = 24;
+  const C1 = 390, C2 = 456, C3 = 522, C4 = 588;
+  const YS = [140, 220, 300, 380, 460, 540];   // C2 & C4 — straight, starts higher
+  const YT = [173, 253, 333, 413, 493, 573];   // C1 & C3 — staggered down
 
   const tables = [
     // Top-left pair
-    { n:'17', x:226, y:118 },
-    { n:'13', x:321, y:118 },
+    { n:'17', x:179, y:96 },
+    { n:'13', x:288, y:96 },
 
-    // Col 1 (straight): 3, 1♥, 2, 10, 14  — 5 tables
-    { n:'3',  x:C1, y:YS[0] },
-    { n:'1',  x:C1, y:YS[1], sw:true },
-    { n:'2',  x:C1, y:YS[2] },
-    { n:'10', x:C1, y:YS[3] },
-    { n:'14', x:C1, y:YS[4] },
+    // Col 1 (staggered down, YT): 3, 1♥, 2, 10, 14
+    { n:'3',  x:C1, y:YT[0] },
+    { n:'1',  x:C1, y:YT[1], sw:true },
+    { n:'2',  x:C1, y:YT[2] },
+    { n:'10', x:C1, y:YT[3] },
+    { n:'14', x:C1, y:YT[4] },
 
-    // Col 2 (staggered): 7, 6, 5, 4, 15, 26  — 5 tables
-    { n:'7',  x:C2, y:YT[0] },
-    { n:'6',  x:C2, y:YT[1] },
-    { n:'5',  x:C2, y:YT[2] },
-    { n:'4',  x:C2, y:YT[3] },
-    { n:'15', x:C2, y:YT[4] },
-    { n:'26', x:C2, y:YT[4]+76 },
+    // Col 2 (straight up, YS): 7, 6, 5, 4, 15, 26
+    { n:'7',  x:C2, y:YS[0] },
+    { n:'6',  x:C2, y:YS[1] },
+    { n:'5',  x:C2, y:YS[2] },
+    { n:'4',  x:C2, y:YS[3] },
+    { n:'15', x:C2, y:YS[4] },
+    { n:'26', x:C2, y:YS[5] },
 
-    // Col 3 (straight): 9, 11, 8, 18, 25  — 5 tables
-    { n:'9',  x:C3, y:YS[0] },
-    { n:'11', x:C3, y:YS[1] },
-    { n:'8',  x:C3, y:YS[2] },
-    { n:'18', x:C3, y:YS[3] },
-    { n:'25', x:C3, y:YS[4] },
+    // Col 3 (staggered down, YT): 9, 11, 8, 18, 25
+    { n:'9',  x:C3, y:YT[0] },
+    { n:'11', x:C3, y:YT[1] },
+    { n:'8',  x:C3, y:YT[2] },
+    { n:'18', x:C3, y:YT[3] },
+    { n:'25', x:C3, y:YT[4] },
 
-    // Col 4 (staggered): 19, 16, 21, 20, 27  — 5 tables
-    { n:'19', x:C4, y:YT[0] },
-    { n:'16', x:C4, y:YT[1] },
-    { n:'21', x:C4, y:YT[2] },
-    { n:'20', x:C4, y:YT[3] },
-    { n:'27', x:C4, y:YT[4] },
+    // Col 4 (straight up, YS): 19, 16, 21, 20, 27
+    { n:'19', x:C4, y:YS[0] },
+    { n:'16', x:C4, y:YS[1] },
+    { n:'21', x:C4, y:YS[2] },
+    { n:'20', x:C4, y:YS[3] },
+    { n:'27', x:C4, y:YS[4] },
 
-    // Bottom-left cluster — clear of dance floor (bottom y=454), start at 476
-    { n:'22', x:146, y:476 },
-    { n:'12', x:226, y:476 },
-    { n:'24', x:146, y:552 },
-    { n:'23', x:226, y:552 },
-    { n:'28', x:186, y:620 },
+    // Bottom-left cluster: y=444, spacing=72, left x=166
+    { n:'22', x:166, y:444 },
+    { n:'12', x:236, y:444 },
+    { n:'24', x:166, y:516 },
+    { n:'23', x:236, y:516 },
+    { n:'28', x:201, y:588 },
   ];
 
   tables.forEach(t => drawTable(svg, t.n, t.x, t.y, R, !!t.sw));
