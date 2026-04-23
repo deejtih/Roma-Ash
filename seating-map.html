@@ -39,7 +39,7 @@
   /* Side-by-side layout */
   .layout { display:flex; flex-direction:row; gap:2rem; align-items:flex-start; width:100%; max-width:1300px; }
 
-  /* Map */
+  /* Map card */
   .map-wrap { flex:1 1 auto; min-width:0; background:var(--paper); border:1px solid var(--rule); border-radius:2px; padding:1.5rem; box-shadow:0 2px 4px rgba(30,26,23,.04),0 12px 48px rgba(30,26,23,.08),inset 0 1px 0 rgba(255,255,255,.9); position:relative; overflow:auto; }
   .map-wrap::before { content:''; position:absolute; top:10px; left:10px; width:14px; height:14px; border-top:1px solid var(--gold-pale); border-left:1px solid var(--gold-pale); }
   .map-wrap::after  { content:''; position:absolute; bottom:10px; right:10px; width:14px; height:14px; border-bottom:1px solid var(--gold-pale); border-right:1px solid var(--gold-pale); }
@@ -48,19 +48,19 @@
   /* Tables */
   .tbl { cursor:pointer; }
   .tbl circle.bg { fill:var(--paper); stroke:#a89880; stroke-width:1.8; transition:fill .18s,stroke .2s,stroke-width .18s; filter:drop-shadow(0 1px 3px rgba(30,26,23,.1)); }
-  .tbl text.num { font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:400; font-style:italic; fill:#2a2218; text-anchor:middle; dominant-baseline:central; pointer-events:none; transition:fill .18s; user-select:none; }
+  .tbl text.num { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:400; font-style:italic; fill:#2a2218; text-anchor:middle; dominant-baseline:central; pointer-events:none; transition:fill .18s; user-select:none; }
   .tbl text.sub { font-family:'Tenor Sans',sans-serif; font-size:6.5px; letter-spacing:.1em; text-transform:uppercase; fill:var(--gold); text-anchor:middle; pointer-events:none; user-select:none; }
   .tbl:hover circle.bg { fill:var(--hover-bg); stroke:var(--gold); stroke-width:2.2; }
-  .tbl:hover text.num { fill:#8b6f3a; }
+  .tbl:hover text.num  { fill:#8b6f3a; }
   .tbl.active circle.bg { fill:var(--active-bg); stroke:var(--gold); stroke-width:2.8; filter:drop-shadow(0 2px 8px rgba(184,151,90,.4)); }
-  .tbl.active text.num { fill:#5c3d10; }
+  .tbl.active text.num  { fill:#5c3d10; }
   .tbl.sweetheart circle.bg { fill:#fdf0e0; stroke:var(--gold); stroke-width:2; }
-  .tbl.sweetheart text.num { fill:#8b6f3a; }
+  .tbl.sweetheart text.num  { fill:#8b6f3a; }
   .tbl.sweetheart.active circle.bg, .tbl.sweetheart:hover circle.bg { fill:var(--active-bg); stroke-width:2.8; }
 
   /* Room labels */
-  .rlbl    { font-family:'Tenor Sans',sans-serif; font-size:9px; letter-spacing:.12em; text-transform:uppercase; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
-  .rlbl-lg { font-family:'Cormorant Garamond',serif; font-size:15px; font-style:italic; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
+  .rlbl    { font-family:'Tenor Sans',sans-serif; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
+  .rlbl-lg { font-family:'Cormorant Garamond',serif; font-size:16px; font-style:italic; fill:#6b5d54; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
   .rlbl-sm { font-family:'Tenor Sans',sans-serif; font-size:8px; letter-spacing:.1em; text-transform:uppercase; fill:#8a7a72; text-anchor:middle; dominant-baseline:central; pointer-events:none; user-select:none; }
 
   /* Sticky panel */
@@ -145,156 +145,114 @@ const NS = 'http://www.w3.org/2000/svg';
 function mk(tag, a={}) { const e=document.createElementNS(NS,tag); Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v)); return e; }
 function add(p,...kids) { kids.forEach(k=>p.appendChild(k)); return p; }
 function rct(x,y,w,h,a={}) { return mk('rect',{x,y,width:w,height:h,...a}); }
-function lbl(x,y,s,c,dy=0) { const t=mk('text',{x,y:y+dy,class:c}); t.textContent=s; return t; }
+function lbl(x,y,s,c) { const t=mk('text',{x,y,class:c}); t.textContent=s; return t; }
 
-// ── Coordinate system ─────────────────────────────────────────────────────────
-// Source canvas: 660×820 (room 20,20 → 640,780)
-// Scale factor: 1.27 uniformly — gives a viewBox of ~838×1041
-// All coordinates below are source × 1.27, rounded to integers.
-// (Computed above via Python.)
+// ── Coordinate origin ─────────────────────────────────────────────────────────
+// Source SVG: 960×720. All coordinates below are source × 0.92 (scaled to fit).
+// Room: 20×20 → 640×760 in source → 18×18 → 589×699 scaled.
 
-const VW = 870, VH = 1070;  // slight extra margin
+const VW = 900, VH = 680;
 
 function buildMap() {
   const svg = document.getElementById('map');
   svg.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
-  svg.setAttribute('width',  VW);
+  svg.setAttribute('width', VW);
   svg.setAttribute('height', VH);
 
-  // ── Room ──────────────────────────────────────────────────────────────────
-  // source: x=20,y=20,w=620,h=760 → scaled ×1.27
-  add(svg, rct(25,25,787,965,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'4'}));
+  // Room boundary (source rect 20,20 w=620 h=740 → scaled)
+  add(svg, rct(18,18,571,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
 
-  // ── Dance floor ───────────────────────────────────────────────────────────
-  // source: x=175,y=120,w=190,h=160 → 222,152,241,203
+  // ── Dance floor ── source: x=78,y=203 w=276,h=290 → scaled ×0.92
   add(svg,
-    rct(222,152,241,203,{fill:'#ede5d8',stroke:'#c8b99a','stroke-width':'1.2',rx:'3'}),
-    lbl(342,245,'Dance Floor','rlbl-lg'),
-    lbl(342,264,"21' × 21'",'rlbl-sm')
+    rct(72,187,254,267,{fill:'#ede5d8',stroke:'#c8b99a','stroke-width':'1.2',rx:'2'}),
+    lbl(199,316,'Dance Floor','rlbl-lg'),
+    lbl(199,336,"21' × 21'",'rlbl-sm')
   );
 
-  // ── DJ table ──────────────────────────────────────────────────────────────
-  // source: x=22,y=22,w=100,h=65 → 28,28,127,83
+  // ── Bar LEFT ── source rect: x=197,y=4 w=157,h=66
   add(svg,
-    rct(28,28,127,83,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
-    lbl(91,70,'DJ TABLE','rlbl-sm')
+    rct(181,4,145,60,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(253,34,'BAR','rlbl')
   );
 
-  // ── Bar 1 ─────────────────────────────────────────────────────────────────
-  // source: x=470,y=22,w=80,h=50 → 597,28,102,64
+  // ── Bar RIGHT ── source rect: x=623,y=4 w=157,h=66  — but SVG is 960 wide
+  // scale: 623×0.92=573, but room ends at 589. Bar right is near right wall.
   add(svg,
-    rct(597,28,102,64,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
-    lbl(648,60,'BAR','rlbl')
+    rct(456,4,145,60,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
+    lbl(528,34,'BAR','rlbl')
   );
 
-  // ── Bar 2 ─────────────────────────────────────────────────────────────────
-  // source: x=568,y=22,w=80,h=50 → 721,28,102,64
+  // ── Entrance 1 ── source: x=312,y=690 w=100,h=30
   add(svg,
-    rct(721,28,102,64,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
-    lbl(772,60,'BAR','rlbl')
+    rct(287,635,92,28,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
+    lbl(333,649,'RECEPTION\nENTRANCE','rlbl-sm'),
+    lbl(333,649,'RECEPTION','rlbl-sm'),
+    lbl(333,661,'ENTRANCE','rlbl-sm')
+  );
+  // (remove the double label above - render cleanly)
+
+  // ── Entrance 2 ── source: x=644,y=690 w=100,h=30
+  add(svg,
+    rct(592,635,92,28,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}),
+    lbl(638,649,'GUEST ENT.','rlbl-sm')
   );
 
-  // ── Backdrop + arches ─────────────────────────────────────────────────────
-  // source: x=22,y=110,w=16,h=210 → 28,140,20,267
+  // ── Backdrop / arch — left wall thin strip (source x=22,y=110 w=16,h=210)
   add(svg,
-    rct(28,140,20,267,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(38,225,'BACKDROP','rlbl-sm'),
-    lbl(38,238,'+ ARCHES','rlbl-sm')
+    rct(18,101,15,193,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'1'}),
+    lbl(25,180,'BACKDROP','rlbl-sm'),
+    lbl(25,192,'+ARCH','rlbl-sm')
   );
 
-  // ── Gift table ────────────────────────────────────────────────────────────
-  // source: x=22,y=330,w=65,h=32 → 28,419,83,41
-  add(svg,
-    rct(28,419,83,41,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(69,440,'GIFT TABLE','rlbl-sm')
-  );
+  // ── Sweetheart label at table 1 position (x=495, y=280) — gold ellipse
+  add(svg, mk('ellipse',{cx:495,cy:280,rx:38,ry:14,fill:'#fdf0e0',stroke:'var(--gold)','stroke-width':'1.5'}));
 
-  // ── Floral stands ─────────────────────────────────────────────────────────
-  // source: x=22,y=540,w=55,h=28 → 28,686,70,36
-  add(svg,
-    rct(28,686,70,36,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}),
-    lbl(63,704,'FLORAL','rlbl-sm')
-  );
-
-  // ── Photo bal & stairs ───────────────────────────────────────────────────
-  // source: x=22,y=680,w=120,h=60 → 28,864,152,76
-  add(svg,
-    rct(28,864,152,76,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
-    lbl(104,896,'PHOTO BAL','rlbl'),
-    lbl(104,910,'& STAIRS','rlbl')
-  );
-
-  // ── Photo booth ───────────────────────────────────────────────────────────
-  // source: x=530,y=695,w=100,h=55 → 673,882,127,70
-  add(svg,
-    rct(673,882,127,70,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'3'}),
-    lbl(736,912,'PHOTO','rlbl'),
-    lbl(736,925,'BOOTH','rlbl')
-  );
-
-  // ── Sweetheart table (ellipse) ────────────────────────────────────────────
-  // source: x=230,y=298,w=120,h=30 → cx=369,cy=402,rx=76,ry=19
-  const sw = mk('ellipse',{cx:369,cy:402,rx:76,ry:19,fill:'#fdf0e0',stroke:'#c8975a','stroke-width':'1.5'});
-  const swt = mk('text',{x:369,y:402,class:'rlbl-sm',style:'fill:#8b6f3a'});
-  swt.textContent = '♥ Sweetheart';
-  add(svg, sw, swt);
-
-  // ── Entrance 1 ────────────────────────────────────────────────────────────
-  // source: x=200,y=760,w=150,h=28 → 254,965,191,36
-  add(svg,
-    rct(254,965,191,36,{fill:'#f0ebe3',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'2'}),
-    lbl(349,983,'RECEPTION ENTRANCE','rlbl-sm')
-  );
-
-  // ── Entrance 2 ────────────────────────────────────────────────────────────
-  // source: x=380,y=760,w=130,h=28 → 483,965,165,36
-  add(svg,
-    rct(483,965,165,36,{fill:'#f0ebe3',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'2'}),
-    lbl(565,983,'GUEST ENTRANCE','rlbl-sm')
-  );
-
-  // ── Welcome / QR ─────────────────────────────────────────────────────────
-  // source: x=520,y=750,w=110,h=30 → 660,953,140,38
-  add(svg,
-    rct(660,952,140,38,{fill:'#f0ebe3',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'2'}),
-    lbl(730,971,'QR / SIGN','rlbl-sm')
-  );
-
-  // ── Tables ────────────────────────────────────────────────────────────────
-  // All coordinates are source (x,y) × 1.27, rounded.
-  // source r=24 → scaled r=30
-  const R = 30;
-
+  // ────────────────────────────────────────────────────────────────────────────
+  // TABLE POSITIONS
+  // Decoded from SVG path analysis × 0.92 scale factor.
+  // All 28 tables, uniform radius R=26.
+  // ────────────────────────────────────────────────────────────────────────────
+  const R = 26;
   const tables = [
-    // Positions directly from drag tool × 1.27
-    { n:'1',  x:375, y:489,  sw:true  },  // sweetheart — matches ellipse centre
-    { n:'2',  x:279, y:635           },
-    { n:'3',  x:495, y:394           },
-    { n:'4',  x:273, y:476           },
-    { n:'5',  x:572, y:324           },
-    { n:'6',  x:190, y:318           },
-    { n:'7',  x:622, y:273           },
-    { n:'8',  x:273, y:578           },
-    { n:'9',  x:432, y:667           },
-    { n:'10', x:349, y:610           },
-    { n:'11', x:572, y:432           },
-    { n:'12', x:425, y:565           },
-    { n:'13', x:190, y:413           },
-    { n:'14', x:527, y:565           },
-    { n:'15', x:190, y:508           },
-    { n:'16', x:622, y:197           },
-    { n:'17', x:114, y:470           },
-    { n:'18', x:692, y:394           },
-    { n:'19', x:730, y:197           },
-    { n:'20', x:724, y:508           },
-    { n:'21', x:114, y:578           },
-    { n:'22', x:635, y:749           },
-    { n:'23', x:387, y:749           },
-    { n:'24', x:229, y:749           },
-    { n:'25', x:527, y:749           },
-    { n:'26', x:495, y:648           },
-    { n:'27', x:724, y:622           },
-    { n:'28', x:190, y:826           },
+    // Top-left cluster (above dance floor)
+    { n:'17', x:226, y:118 },
+    { n:'13', x:321, y:120 },
+
+    // Main right-side grid — Col 1 (x≈495)
+    { n:'3',  x:495, y:209 },
+    { n:'1',  x:495, y:280, sw:true },
+    { n:'2',  x:495, y:350 },
+    { n:'10', x:498, y:431 },
+
+    // Col 2 (x≈549)
+    { n:'7',  x:549, y:170 },
+    { n:'6',  x:549, y:247 },
+    { n:'5',  x:549, y:324 },
+    { n:'4',  x:549, y:400 },
+    { n:'15', x:558, y:479 },
+    { n:'26', x:559, y:559 },
+
+    // Col 3 (x≈610-621)
+    { n:'9',  x:610, y:209 },
+    { n:'11', x:621, y:278 },
+    { n:'8',  x:610, y:368 },
+    { n:'18', x:620, y:445 },
+    { n:'25', x:621, y:527 },
+
+    // Col 4 (x≈685-688)
+    { n:'19', x:685, y:167 },
+    { n:'16', x:687, y:236 },
+    { n:'21', x:688, y:313 },
+    { n:'20', x:688, y:401 },
+    { n:'27', x:685, y:489 },
+
+    // Bottom-left cluster
+    { n:'14', x:483, y:523 },
+    { n:'22', x:146, y:520 },
+    { n:'12', x:235, y:518 },
+    { n:'24', x:146, y:577 },
+    { n:'23', x:236, y:577 },
+    { n:'28', x:191, y:629 },
   ];
 
   tables.forEach(t => drawTable(svg, t.n, t.x, t.y, R, !!t.sw));
