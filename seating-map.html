@@ -152,7 +152,7 @@ function lbl(x,y,s,c) { const t=mk('text',{x,y,class:c}); t.textContent=s; retur
 // Source SVG: 960×720. All coordinates below are source × 0.92 (scaled to fit).
 // Room: 20×20 → 640×760 in source → 18×18 → 589×699 scaled.
 
-const VW = 680, VH = 680;
+const VW = 760, VH = 680;
 
 function buildMap() {
   const svg = document.getElementById('map');
@@ -160,8 +160,8 @@ function buildMap() {
   svg.setAttribute('width', VW);
   svg.setAttribute('height', VH);
 
-  // Room boundary (source rect 20,20 w=620 h=740 → scaled)
-  add(svg, rct(18,0,630,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
+  // Room spans full viewBox with padding
+  add(svg, rct(18,0,724,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
 
   // ── Dance floor ── source: x=78,y=203 w=276,h=290 → scaled ×0.92
   add(svg,
@@ -171,11 +171,11 @@ function buildMap() {
   );
 
   // ── Bar LEFT ── source rect: x=197,y=4 w=157,h=66
-  add(svg, rct(181,4,130,50,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}), lbl(246,29,'BAR','rlbl'));
-  add(svg, rct(337,4,130,50,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}), lbl(402,29,'BAR','rlbl'));
+  add(svg, rct(210,4,130,50,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}), lbl(275,29,'BAR','rlbl'));
+  add(svg, rct(390,4,130,50,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1',rx:'2'}), lbl(455,29,'BAR','rlbl'));
 
-  add(svg, rct(200,630,110,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}), lbl(255,641,'RECEPTION','rlbl-sm'), lbl(255,653,'ENTRANCE','rlbl-sm'));
-  add(svg, rct(370,630,100,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}), lbl(420,641,'GUEST','rlbl-sm'), lbl(420,653,'ENTRANCE','rlbl-sm'));
+  add(svg, rct(230,630,120,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}), lbl(290,641,'RECEPTION','rlbl-sm'), lbl(290,653,'ENTRANCE','rlbl-sm'));
+  add(svg, rct(400,630,110,30,{fill:'#e4dcd2',stroke:'#c4bab0','stroke-width':'1','stroke-dasharray':'4,3',rx:'1'}), lbl(455,641,'GUEST','rlbl-sm'), lbl(455,653,'ENTRANCE','rlbl-sm'));
 
   // ── Backdrop / arch — centred on dance floor (y=187 h=267)
   add(svg,
