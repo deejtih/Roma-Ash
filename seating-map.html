@@ -160,8 +160,8 @@ function buildMap() {
   svg.setAttribute('width', VW);
   svg.setAttribute('height', VH);
 
-  // Room spans full viewBox with padding
-  add(svg, rct(18,0,724,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
+  // Room fills the full viewBox — no gaps
+  add(svg, rct(0,0,760,680,{fill:'#f7f4ef',stroke:'#bfb5aa','stroke-width':'1.5',rx:'3'}));
 
   // ── Dance floor ── source: x=78,y=203 w=276,h=290 → scaled ×0.92
   add(svg,
@@ -234,12 +234,12 @@ function buildMap() {
     { n:'20', x:C4, y:YS[3] },
     { n:'27', x:C4, y:YS[4] },
 
-    // Bottom-left cluster: y=444, spacing=72, left x=166
-    { n:'22', x:166, y:444 },
-    { n:'12', x:236, y:444 },
-    { n:'24', x:166, y:516 },
-    { n:'23', x:236, y:516 },
-    { n:'28', x:201, y:588 },
+    // Bottom-left cluster — dance floor bottom = y=454, start well below at y=484
+    { n:'22', x:166, y:484 },
+    { n:'12', x:236, y:484 },
+    { n:'24', x:166, y:556 },
+    { n:'23', x:236, y:556 },
+    { n:'28', x:201, y:620 },
   ];
 
   tables.forEach(t => drawTable(svg, t.n, t.x, t.y, R, !!t.sw));
